@@ -5,6 +5,10 @@ interface Note {
   id: number;
   title: string;
   body: string;
+  /** Epoch ms when the note was created. */
+  createdAt: number;
+  /** Epoch ms when the note was last edited. */
+  updatedAt: number;
 }
 
 const db = new Dexie("NotesDB") as Dexie & {
@@ -16,7 +20,7 @@ const db = new Dexie("NotesDB") as Dexie & {
 
 // Schema declaration:
 db.version(1).stores({
-  notes: "++id, title, body", // primary key "id" (for the runtime!)
+  notes: "++id, createdAt, updatedAt", // primary key "id" (for the runtime!)
 });
 
 export type { Note };
