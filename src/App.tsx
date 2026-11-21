@@ -4,10 +4,12 @@ import { NotesHeader } from "@/components/notes/NotesHeader";
 import { NoteComposer } from "@/components/notes/NoteComposer";
 import { TakeNoteBar } from "@/components/notes/TakeNoteBar";
 import { Toaster } from "@/components/ui/toast";
+import { GraphView } from "@/components/graph/GraphView";
 import { useNotesStore } from "@/store";
 
 function App() {
   const fetchNotes = useNotesStore((state) => state.fetchNotes);
+  const view = useNotesStore((state) => state.view);
 
   useEffect(() => {
     void fetchNotes();
@@ -17,8 +19,14 @@ function App() {
     <div className="min-h-svh bg-background">
       <NotesHeader />
       <main className="mx-auto w-full max-w-5xl px-4 py-6">
-        <TakeNoteBar />
-        <NotesGrid />
+        {view === "graph" ? (
+          <GraphView />
+        ) : (
+          <>
+            <TakeNoteBar />
+            <NotesGrid />
+          </>
+        )}
       </main>
       <NoteComposer />
       <Toaster />

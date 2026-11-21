@@ -8,7 +8,11 @@ import {
   type NoteInput,
 } from "@/lib/notes";
 
+export type AppView = "notes" | "graph";
+
 interface NotesState {
+  /** Which main view is shown: the notes list or the Cypher graph view. */
+  view: AppView;
   /** All notes, most recently updated first. */
   notes: Note[];
   /** Whether the composer dialog is open. */
@@ -28,9 +32,12 @@ interface NotesState {
   openComposer: (noteId?: number) => void;
   /** Closes the composer and clears the editing state. */
   closeComposer: () => void;
+  /** Switches the main view between notes and the graph. */
+  setView: (view: AppView) => void;
 }
 
 export const useNotesStore = create<NotesState>((set, get) => ({
+  view: "notes",
   notes: [],
   composerOpen: false,
   editingNoteId: null,
@@ -67,4 +74,6 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     })),
 
   closeComposer: () => set({ composerOpen: false, editingNoteId: null }),
+
+  setView: (view) => set({ view }),
 }));
