@@ -1,6 +1,6 @@
 // Owns the relate database. Loads the engine from /relate/ (see copy-relate)
 // and keeps the graph in OPFS so it survives reloads.
-import type { RunRequest, RunResponse } from "./relateProtocol";
+import type { RunResponse, WorkerRequest } from "./relateProtocol";
 
 interface RelateEngine {
   default: () => Promise<unknown>;
@@ -9,6 +9,7 @@ interface RelateEngine {
 
 interface EngineDatabase {
   execute: (statement: string) => string;
+  reset: () => void;
 }
 
 type IsWasmTrap = (err: unknown) => boolean;
@@ -16,7 +17,7 @@ type IsWasmTrap = (err: unknown) => boolean;
 const DATABASE_URI = "opfs://notes_graph";
 
 const scope = self as unknown as {
-  onmessage: ((event: MessageEvent<RunRequest>) => void) | null;
+  onmessage: ((event: MessageEvent<WorkerRequest>) => void) | null;
   postMessage: (response: RunResponse) => void;
 };
 
@@ -50,16 +51,24 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-async function runStatement(request: RunRequest): Promise<RunResponse> {
+function performRequest(db: EngineDatabase, request: WorkerRequest): string {
+  if (request.kind === "reset") {
+    db.reset();
+    return "";
+  }
+  return db.execute(request.statement);
+}
+
+async function handleRequest(request: WorkerRequest): Promise<RunResponse> {
   try {
     const db = await getDatabase();
-    return { id: request.id, text: db.execute(request.statement) };
+    return { id: request.id, text: performRequest(db, request) };
   } catch (err) {
     return { id: request.id, failed: errorMessage(err), trap: isTrap(err) };
   }
 }
 
 scope.onmessage = async (event) => {
-  const response = await runStatement(event.data);
+  const response = await handleRequest(event.data);
   scope.postMessage(response);
 };

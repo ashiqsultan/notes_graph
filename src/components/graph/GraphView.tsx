@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ResetGraphButton } from "@/components/graph/ResetGraphButton";
 import { runCypher } from "@/graph/relateClient";
 
 /** Runs one Cypher statement against relate and shows the raw result. */
@@ -34,6 +35,9 @@ function GraphView() {
           {running ? "Running…" : "Run"}
         </Button>
       </form>
+      <div className="max-w-2.5">
+      {import.meta.env.DEV && <ResetGraphButton onReset={() => setOutput("")} />}
+      </div>
       <div className="whitespace-pre-wrap break-all font-mono text-sm">{output}</div>
     </section>
   );

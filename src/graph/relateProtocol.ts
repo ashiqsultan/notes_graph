@@ -2,12 +2,20 @@
 
 export interface RunRequest {
   id: number;
+  kind: "run";
   statement: string;
 }
 
+export interface ResetRequest {
+  id: number;
+  kind: "reset";
+}
+
+export type WorkerRequest = RunRequest | ResetRequest;
+
 export interface RunSuccess {
   id: number;
-  /** The raw envelope JSON returned by relate. */
+  /** The raw envelope JSON returned by relate; empty after a reset. */
   text: string;
 }
 

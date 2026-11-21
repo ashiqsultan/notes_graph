@@ -2,8 +2,8 @@
 // envelope text relate returned for the statement.
 import {
   isRunFailure,
-  type RunRequest,
   type RunResponse,
+  type WorkerRequest,
 } from "./relateProtocol";
 
 interface PendingRun {
@@ -51,11 +51,18 @@ function restartWorker(reason: Error): void {
   pending.clear();
 }
 
-export function runCypher(statement: string): Promise<string> {
+function send(buildRequest: (id: number) => WorkerRequest): Promise<string> {
   return new Promise((resolve, reject) => {
     const id = nextId++;
     pending.set(id, { resolve, reject });
-    const request: RunRequest = { id, statement };
-    getWorker().postMessage(request);
+    getWorker().postMessage(buildRequest(id));
   });
+}
+
+export function runCypher(statement: string): Promise<string> {
+  return send((id) => ({ id, kind: "run", statement }));
+}
+
+export async function resetGraph(): Promise<void> {
+  await send((id) => ({ id, kind: "reset" }));
 }
