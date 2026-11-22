@@ -4,9 +4,9 @@ import {
   type TextGenerationPipeline,
 } from "@huggingface/transformers";
 
-const MODEL_ID = "onnx-community/Qwen2.5-Coder-0.5B-Instruct";
+const MODEL_ID = "onnx-community/Qwen3-0.6B-ONNX";
 const SYSTEM_PROMPT = "You are a helpful assistant. Answer the user's question.";
-const MAX_NEW_TOKENS = 512;
+const MAX_NEW_TOKENS = 1024;
 
 let generatorPromise: Promise<TextGenerationPipeline> | null = null;
 
@@ -16,7 +16,8 @@ export function loadTextGenerator(
 ): Promise<TextGenerationPipeline> {
   generatorPromise ??= pipeline("text-generation", MODEL_ID, {
     device: "webgpu",
-    dtype: "q4",
+    // dtype: "q4",
+    dtype: "q4f16",
     progress_callback: onProgress,
   });
   return generatorPromise;
@@ -26,9 +27,10 @@ export function loadTextGenerator(
 export async function generateReply(
   generator: TextGenerationPipeline,
   prompt: string,
+  systemPrompt: string = SYSTEM_PROMPT,
 ): Promise<string> {
   const messages = [
-    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: systemPrompt },
     { role: "user", content: prompt },
   ];
   const [output] = await generator(messages, {

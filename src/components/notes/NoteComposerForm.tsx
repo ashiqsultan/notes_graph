@@ -1,5 +1,5 @@
 import { CornerDownLeftIcon } from "lucide-react";
-import { useState, type KeyboardEvent } from "react";
+import { useEffect, useState, type KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DialogContent,
@@ -30,11 +30,19 @@ function NoteComposerForm({
 }: NoteComposerFormProps) {
   const persistNote = useNotesStore((state) => state.persistNote);
   const closeComposer = useNotesStore((state) => state.closeComposer);
+  const syncUnsyncedNote = useNotesStore((state) => state.syncUnsyncedNote);
 
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
 
   const autoSave = useAutoSave<NoteInput>(persistNote, AUTO_SAVE_DELAY_MS);
+
+  // The form remounts per session, so unmounting means the composer closed.
+  useEffect(() => {
+    return () => {
+      void Promise.resolve(autoSave.flush()).then(syncUnsyncedNote);
+    };
+  }, [autoSave, syncUnsyncedNote]);
 
   function handleTitleChange(value: string) {
     setTitle(value);

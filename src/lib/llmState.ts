@@ -35,17 +35,25 @@ export function reduceWorkerResponse(
     case "ready":
       return { ...state, status: "ready", progress: null };
     case "reply":
-      return { ...state, reply: response.text, generating: false };
+      return state;
     case "error":
+      if (response.id !== undefined) return state;
       return {
         ...state,
         status: state.status === "loading" ? "error" : state.status,
         error: response.message,
-        generating: false,
       };
   }
 }
 
 export function startGenerating(state: LlmState): LlmState {
   return { ...state, generating: true, error: null };
+}
+
+export function finishGenerating(state: LlmState, reply: string): LlmState {
+  return { ...state, reply, generating: false };
+}
+
+export function failGenerating(state: LlmState, message: string): LlmState {
+  return { ...state, error: message, generating: false };
 }
