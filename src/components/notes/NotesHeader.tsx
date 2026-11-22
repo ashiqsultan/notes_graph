@@ -1,14 +1,18 @@
 import { StickyNoteIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNotesStore } from "@/store";
+import { useNotesStore, type AppView } from "@/store";
 
-/** Top app bar with the brand and a "New note" action. */
+const VIEW_BUTTONS: { view: AppView; label: string }[] = [
+  { view: "notes", label: "View Notes" },
+  { view: "graph", label: "View Graph" },
+  { view: "chat", label: "AI Chat" },
+];
+
+/** Top app bar with the brand, view switches, and a "New note" action. */
 function NotesHeader() {
   const openComposer = useNotesStore((state) => state.openComposer);
   const view = useNotesStore((state) => state.view);
   const setView = useNotesStore((state) => state.setView);
-
-  const isGraphView = view === "graph";
 
   return (
     <header className="border-b bg-background">
@@ -18,12 +22,15 @@ function NotesHeader() {
           <h1 className="font-heading text-lg font-medium">Notes</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setView(isGraphView ? "notes" : "graph")}
-          >
-            {isGraphView ? "View Notes" : "View Graph"}
-          </Button>
+          {VIEW_BUTTONS.map(({ view: target, label }) => (
+            <Button
+              key={target}
+              variant={target === view ? "default" : "outline"}
+              onClick={() => setView(target)}
+            >
+              {label}
+            </Button>
+          ))}
           <Button onClick={() => openComposer()}>New note</Button>
         </div>
       </div>

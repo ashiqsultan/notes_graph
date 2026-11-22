@@ -8,7 +8,7 @@ import {
   type NoteInput,
 } from "@/lib/notes";
 
-export type AppView = "notes" | "graph";
+export type AppView = "notes" | "graph" | "chat";
 
 interface NotesState {
   /** Which main view is shown: the notes list or the Cypher graph view. */
@@ -32,7 +32,7 @@ interface NotesState {
   openComposer: (noteId?: number) => void;
   /** Closes the composer and clears the editing state. */
   closeComposer: () => void;
-  /** Switches the main view between notes and the graph. */
+  /** Switches the main view between notes, the graph, and the AI chat. */
   setView: (view: AppView) => void;
 }
 
