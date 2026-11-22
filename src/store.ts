@@ -24,10 +24,10 @@ import {
   type NoteInput,
 } from "@/lib/notes";
 
-export type AppView = "notes" | "graph" | "chat";
+export type AppView = "notes" | "chat";
 
 interface NotesState {
-  /** Which main view is shown: the notes list or the Cypher graph view. */
+  /** Which main view is shown: the notes list or the AI chat. */
   view: AppView;
   /** All notes, most recently updated first. */
   notes: Note[];
@@ -54,7 +54,7 @@ interface NotesState {
   closeComposer: () => void;
   /** Queues the graph update for the note saved in the composer, if any. */
   syncUnsyncedNote: () => void;
-  /** Switches the main view between notes, the graph, and the AI chat. */
+  /** Switches the main view between the notes and the AI chat. */
   setView: (view: AppView) => void;
   /** Starts downloading and loading the model. Safe to call more than once. */
   loadModel: () => void;

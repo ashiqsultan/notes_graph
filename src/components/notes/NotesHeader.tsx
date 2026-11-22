@@ -4,7 +4,6 @@ import { useNotesStore, type AppView } from "@/store";
 
 const VIEW_BUTTONS: { view: AppView; label: string }[] = [
   { view: "notes", label: "View Notes" },
-  { view: "graph", label: "View Graph" },
   { view: "chat", label: "AI Chat" },
 ];
 
