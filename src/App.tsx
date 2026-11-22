@@ -1,6 +1,7 @@
 import { useEffect, type CSSProperties } from "react";
 import { useSidebarResize } from "@/hooks/use-sidebar-resize";
 import { SidebarResizeHandle } from "@/components/sidebar/SidebarResizeHandle";
+import { SidebarGraph } from "@/components/sidebar/SidebarGraph";
 import { NotesGrid } from "@/components/notes/NotesGrid";
 import { NotesHeader } from "@/components/notes/NotesHeader";
 import { NoteComposer } from "@/components/notes/NoteComposer";
@@ -38,7 +39,7 @@ function App() {
     >
       <Sidebar>
         <SidebarContent>
-          <p className="p-4 text-sm">Hello world</p>
+          <SidebarGraph />
         </SidebarContent>
         <SidebarResizeHandle onPointerDown={startResize} />
       </Sidebar>
