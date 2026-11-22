@@ -1,13 +1,28 @@
-import { toast } from "@/components/ui/toast";
+import type { Note } from "@/db";
 import { buildMergeCypher } from "@/graph/buildMergeCypher";
 import { deleteNoteGraph } from "@/graph/deleteNoteGraph";
 import { extractNoteGraph } from "@/graph/extractNoteGraph";
+import {
+  showExtractingToast,
+  showExtractionError,
+  showGraphError,
+  showGraphSaved,
+  showModelUnavailable,
+  showRemovalError,
+  showUnexpectedError,
+} from "@/graph/graphSyncToasts";
 import { runCypher } from "@/graph/relateClient";
 import { isWebGpuAvailable } from "@/lib/llm";
 import { getNote } from "@/lib/notes";
 
 let syncChain: Promise<void> = Promise.resolve();
 const waitingNoteIds = new Set<number>();
+
+interface SyncJob {
+  noteId: number;
+  title: string;
+  toastId: string;
+}
 
 /**
  * Queues a graph update for a note. Syncs run one after another, and a note
@@ -20,37 +35,66 @@ export function queueNoteGraphSync(noteId: number): Promise<void> {
   waitingNoteIds.add(noteId);
   syncChain = syncChain.then(() => {
     waitingNoteIds.delete(noteId);
-    return syncNoteGraph(noteId).catch(reportSyncError);
+    return syncNoteGraph(noteId).catch(showUnexpectedError);
   });
   return syncChain;
+}
+
+async function syncNoteGraph(noteId: number): Promise<void> {
+  const note = await getNote(noteId);
+  const noteText = note ? toNoteText(note) : "";
+  if (!note || !noteText) return removeNoteFromGraph(noteId);
+
+  return rebuildNoteGraph(noteId, displayTitle(note.title), noteText);
+}
+
+async function removeNoteFromGraph(noteId: number): Promise<void> {
+  try {
+    await deleteNoteGraph(noteId);
+  } catch (error) {
+    showRemovalError(error);
+  }
+}
+
+async function rebuildNoteGraph(noteId: number, title: string, noteText: string): Promise<void> {
+  if (!isWebGpuAvailable()) {
+    showModelUnavailable(title);
+    return;
+  }
+
+  const job: SyncJob = { noteId, title, toastId: showExtractingToast(title) };
+  const statement = await extractStatement(job, noteText);
+  if (statement !== null) await writeGraph(job, statement);
 }
 
 /**
  * Extraction and query building finish before anything is deleted, so a failed
  * model call never wipes the note's existing graph.
  */
-async function syncNoteGraph(noteId: number): Promise<void> {
-  const noteText = await readNoteText(noteId);
-  if (noteText && !isWebGpuAvailable()) return;
-
-  const statement = noteText ? await buildNoteStatement(noteText, noteId) : null;
-  await deleteNoteGraph(noteId);
-  if (statement) await runCypher(statement);
+async function extractStatement(job: SyncJob, noteText: string): Promise<string | null> {
+  try {
+    const graph = await extractNoteGraph(noteText);
+    return buildMergeCypher(graph, job.noteId);
+  } catch (error) {
+    showExtractionError(job.toastId, job.title, error);
+    return null;
+  }
 }
 
-async function readNoteText(noteId: number): Promise<string> {
-  const note = await getNote(noteId);
-  if (!note) return "";
+async function writeGraph(job: SyncJob, statement: string): Promise<void> {
+  try {
+    await deleteNoteGraph(job.noteId);
+    await runCypher(statement);
+    showGraphSaved(job.toastId, job.title);
+  } catch (error) {
+    showGraphError(job.toastId, job.title, error);
+  }
+}
+
+function toNoteText(note: Note): string {
   return `${note.title}\n\n${note.body}`.trim();
 }
 
-async function buildNoteStatement(noteText: string, noteId: number): Promise<string | null> {
-  const graph = await extractNoteGraph(noteText);
-  return buildMergeCypher(graph, noteId);
-}
-
-function reportSyncError(error: unknown): void {
-  const description = error instanceof Error ? error.message : String(error);
-  console.error("Graph sync failed", error);
-  toast.add({ title: "Could not update the graph", description, type: "error" });
+function displayTitle(title: string): string {
+  return title.trim() || "Untitled note";
 }
