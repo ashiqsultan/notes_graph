@@ -5,6 +5,7 @@ import {
 } from "@huggingface/transformers";
 import {
   CLASSIFIED_NODE_TYPES,
+  FALLBACK_NODE_DESCRIPTION,
   FALLBACK_NODE_TYPE,
   type NodeType,
 } from "@/graph/nodeTypes";
@@ -30,11 +31,12 @@ export async function classifyWord(
   word: string,
   sentence: string,
 ): Promise<NodeType> {
-  const output = await classifier(
-    `"${word}" in: ${sentence}`,
-    CLASSIFIED_NODE_TYPES.map((entry) => entry.description),
-  );
+  const output = await classifier(`"${word}" in: ${sentence}`, candidateLabels());
   return pickNodeType(output);
+}
+
+function candidateLabels(): string[] {
+  return [...CLASSIFIED_NODE_TYPES.map((entry) => entry.description), FALLBACK_NODE_DESCRIPTION];
 }
 
 function pickNodeType(output: { labels: string[]; scores: number[] }): NodeType {
