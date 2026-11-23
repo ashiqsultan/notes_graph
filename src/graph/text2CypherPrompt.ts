@@ -1,24 +1,34 @@
 import type { GraphSchema } from "@/graph/readSchema";
 
 const RULES = [
-  "You are a Neo4j Cypher query expert, You are provided with the Available Node Types and Relationships in a Graph DB",
-  "Your only job is to translate the user question into a Cypher query",
+  "You write read-only Neo4j Cypher queries for a graph of notes.",
   'Reply with a JSON object only, in exactly this format: {"cypher_query": "<cypher query here>"}',
   "Put the whole Cypher query as one string in cypher_query.",
   "No explanation, no markdown, no code fences.",
-  "Use only the node labels and relationship types listed below.",
-  "When trying to match strings it should NOT be case sensitive",
-  "The query must be read-only: use MATCH, OPTIONAL MATCH, WHERE, WITH, RETURN, ORDER BY and LIMIT only.",
-  "Never use CREATE, MERGE, DELETE, DETACH, SET, REMOVE, DROP, LOAD CSV or CALL.",
-  "When the question asks about things or how they connect, return the matching nodes and relationships so they can be drawn.",
+  "",
+  "Graph shape:",
+  "- Note: one per note. name = the note's title.",
+  "- Entity: a word or phrase taken from the notes. name = how it reads, key = lowercase form.",
+  "- The only relationship is MENTIONED_IN, always from an Entity to a Note.",
+  "",
+  "Rules:",
+  "- Match an entity by key (exact, lowercase), e.g. e.key = 'alpha'.",
+  "- Match notes or names loosely with toLower(n.name) CONTAINS 'text'.",
+  "- Return the matched nodes and relationships (RETURN e, r, n) so they can be drawn.",
+  "- For counts or rankings, return the aggregated columns instead.",
+  "- Add LIMIT 50 to broad queries.",
+  "- Use only MATCH, WHERE, WITH, RETURN, ORDER BY, LIMIT and count. Never write data or call procedures.",
 ];
 
 const EXAMPLES = [
-  "Question: What is connected to the node named Alpha?",
-  '{"cypher_query": "MATCH (n {name: \'Alpha\'})-[r]-(m) RETURN n, r, m"}',
+  "Question: Which notes mention alpha?",
+  '{"cypher_query": "MATCH (e:Entity {key: \'alpha\'})-[r:MENTIONED_IN]->(n:Note) RETURN e, r, n"}',
   "",
-  "Question: How many nodes does each label have?",
-  '{"cypher_query": "MATCH (n) UNWIND labels(n) AS label RETURN label, count(*) AS total ORDER BY total DESC"}',
+  "Question: Which notes share words with the note Trip plan?",
+  '{"cypher_query": "MATCH (t:Note)<-[:MENTIONED_IN]-(e:Entity)-[r:MENTIONED_IN]->(m:Note) WHERE toLower(t.name) CONTAINS \'trip plan\' AND m <> t RETURN e, r, m LIMIT 50"}',
+  "",
+  "Question: Which words appear in the most notes?",
+  '{"cypher_query": "MATCH (e:Entity)-[:MENTIONED_IN]->(n:Note) RETURN e.name AS word, count(n) AS notes ORDER BY notes DESC LIMIT 10"}',
 ];
 
 const OUTPUT_INSTRUCTIONS = [
