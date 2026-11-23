@@ -21,7 +21,7 @@ export function upsertNoteStatement(noteId: number, title: string, words: NoteWo
 function linkWordClauses(word: NoteWord, variable: string): string[] {
   return [
     `MERGE (${variable}:Entity {key: ${quote(word.key)}})`,
-    `  ON CREATE SET ${variable}.name = ${quote(word.name)}`,
+    `  ON CREATE SET ${variable}.name = ${quote(word.name)}, ${variable}.type = ${quote(word.type)}`,
     `MERGE (${variable})-[:MENTIONED_IN]->(n)`,
   ];
 }

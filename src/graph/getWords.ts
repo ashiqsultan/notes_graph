@@ -1,10 +1,13 @@
 import nlp from "compromise";
+import { FALLBACK_NODE_TYPE, type NodeType } from "@/graph/nodeTypes";
 
 export interface NoteWord {
   /** Lowercase form, used to match the same word across notes. */
   key: string;
   /** Display form, as it reads in the note. */
   name: string;
+  /** Classified type. Starts as the fallback until the classifier runs. */
+  type: NodeType;
 }
 
 /** Returns the distinct nouns and noun phrases in a note's text. */
@@ -29,7 +32,7 @@ function findNounPhrases(text: string): NoteWord[] {
 function toNoteWords(phrase: string): NoteWord[] {
   const name = cleanPhrase(phrase);
   if (!/\p{L}/u.test(name)) return [];
-  return [{ key: name.toLowerCase(), name }];
+  return [{ key: name.toLowerCase(), name, type: FALLBACK_NODE_TYPE }];
 }
 
 /** Removes punctuation and extra spaces that the tagger keeps inside phrases. */

@@ -39,7 +39,13 @@ export function isRelateRelationship(value: unknown): value is RelateRelationshi
 }
 
 export function toNvlNode(node: RelateNode): Node {
-  return { id: String(node.id), caption: nodeCaption(node), color: colorForLabel(node.labels[0]) };
+  return { id: String(node.id), caption: nodeCaption(node), color: colorForLabel(nodeType(node)) };
+}
+
+/** Entities carry their classified type as a property; other nodes use their label. */
+function nodeType(node: RelateNode): string | undefined {
+  const type = node.properties.type;
+  return typeof type === "string" ? type : node.labels[0];
 }
 
 export function toNvlRelationship(rel: RelateRelationship): Relationship {

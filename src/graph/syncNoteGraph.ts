@@ -2,6 +2,9 @@ import type { Note } from "@/db";
 import { deleteNoteGraph } from "@/graph/deleteNoteGraph";
 import { getWords } from "@/graph/getWords";
 import {
+  dismissExtractionToast,
+  showExtractionFinished,
+  showExtractionStarted,
   showGraphError,
   showRemovalError,
   showUnexpectedError,
@@ -45,9 +48,12 @@ async function removeNoteFromGraph(noteId: number): Promise<void> {
 }
 
 async function rebuildNoteGraph(noteId: number, title: string, noteText: string): Promise<void> {
+  const toastId = showExtractionStarted(title);
   try {
-    await updateNoteGraph(noteId, title, getWords(noteText));
+    await updateNoteGraph(noteId, title, noteText, getWords(noteText));
+    showExtractionFinished(toastId, title);
   } catch (error) {
+    dismissExtractionToast(toastId);
     showGraphError(title, error);
   }
 }

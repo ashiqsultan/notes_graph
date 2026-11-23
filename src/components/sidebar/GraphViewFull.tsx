@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SidebarGraphCanvas } from "@/components/sidebar/SidebarGraphCanvas";
+import { SidebarGraphLegend } from "@/components/sidebar/SidebarGraphLegend";
 import type { GraphData } from "@/graph/relateElements";
 
 interface GraphViewFullProps {
@@ -27,7 +28,10 @@ function GraphViewFull({ open, onOpenChange, graph, children }: GraphViewFullPro
         </DialogHeader>
         <div className="grid min-h-0 grid-cols-[320px_minmax(0,1fr)] gap-4">
           <div className="flex min-h-0 flex-col gap-2 overflow-y-auto p-1">{children}</div>
-          <SidebarGraphCanvas graph={graph} className="h-full" />
+          <div className="flex min-h-0 flex-col">
+            <SidebarGraphLegend />
+            <SidebarGraphCanvas graph={graph} className="min-h-0 flex-1" />
+          </div>
         </div>
       </DialogContent>
     </Dialog>

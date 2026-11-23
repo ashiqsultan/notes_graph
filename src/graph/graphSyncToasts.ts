@@ -2,6 +2,27 @@ import { toast } from "@/components/ui/toast";
 
 const RESULT_TIMEOUT_MS = 6000;
 
+/** Shows a toast that stays open until the extraction finishes or fails. Returns its id. */
+export function showExtractionStarted(title: string): string {
+  return toast.add({
+    title: `Extracting graph for “${title}”`,
+    type: "loading",
+    timeout: 0,
+  });
+}
+
+export function showExtractionFinished(toastId: string, title: string): void {
+  toast.update(toastId, {
+    title: `Graph updated for “${title}”`,
+    type: "success",
+    timeout: RESULT_TIMEOUT_MS,
+  });
+}
+
+export function dismissExtractionToast(toastId: string): void {
+  toast.close(toastId);
+}
+
 export function showGraphError(title: string, error: unknown): void {
   reportFailure("Graph update failed", error);
   toast.add({
