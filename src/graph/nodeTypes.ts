@@ -6,10 +6,10 @@ export const FALLBACK_NODE_DESCRIPTION = "others";
 
 /** Types a word can be classified as. The description is what the model reads. */
 export const CLASSIFIED_NODE_TYPES = [
-  { type: "Person", description: "a Human Name" },
-  { type: "Place", description: "a city, country, or any place or location" },
-  { type: "Date_Time", description: "date or time" },
-  { type: "Technology", description: "a tool, software, or technology like AI programming language" },
+  { type: "Person", description: "Name of a human" },
+  { type: "Place", description: "Name of any city, country, place or any location" },
+  { type: "Date_Time", description: "Date or time or day of week or month names etc" },
+  { type: "Technology", description: "A tool, software, or technology like AI or programming language etc" },
 ] as const;
 
 export type NodeType =

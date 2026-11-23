@@ -1,8 +1,4 @@
-import {
-  pipeline,
-  type ProgressCallback,
-  type ZeroShotClassificationPipeline,
-} from "@huggingface/transformers";
+import { OpenJev, choice } from "open-jev";
 import {
   CLASSIFIED_NODE_TYPES,
   FALLBACK_NODE_DESCRIPTION,
@@ -10,44 +6,39 @@ import {
   type NodeType,
 } from "@/graph/nodeTypes";
 
-const MODEL_ID = "Xenova/roberta-large-mnli";
-const MIN_SCORE = 0.5;
+const MODEL_ID = "onnx-community/kev-0.6b-ONNX";
+const MIN_CONFIDENCE = 0.5;
 
-let classifierPromise: Promise<ZeroShotClassificationPipeline> | null = null;
+const NODE_TYPE_OPTIONS: NodeType[] = [
+  ...CLASSIFIED_NODE_TYPES.map((entry) => entry.type),
+  FALLBACK_NODE_TYPE,
+];
 
-/** Creates the zero-shot classification pipeline once and reuses it afterwards. */
-export function loadTextClassifier(
-  onProgress?: ProgressCallback,
-): Promise<ZeroShotClassificationPipeline> {
-  classifierPromise ??= pipeline("zero-shot-classification", MODEL_ID, {
-    progress_callback: onProgress,
+const NODE_TYPE_DESCRIPTIONS: Partial<Record<NodeType, string>> = {
+  ...Object.fromEntries(CLASSIFIED_NODE_TYPES.map((entry) => [entry.type, entry.description])),
+  [FALLBACK_NODE_TYPE]: FALLBACK_NODE_DESCRIPTION,
+};
+
+let jevPromise: Promise<OpenJev> | null = null;
+
+/** Loads the model once and reuses it afterwards. Progress is reported as a percent from 0 to 100. */
+export function loadTextClassifier(onProgress?: (percent: number) => void): Promise<OpenJev> {
+  jevPromise ??= OpenJev.load({
+    model: MODEL_ID,
+    dtype: "q4f16",
+    onProgress: ({ progress }) => onProgress?.(progress * 100),
   });
-  return classifierPromise;
+  return jevPromise;
 }
 
 /** Classifies a word by the sentence it appears in. Returns the fallback type when unsure. */
-export async function classifyWord(
-  classifier: ZeroShotClassificationPipeline,
-  word: string,
-  sentence: string,
-): Promise<NodeType> {
-  const output = await classifier(`"${word}" in: ${sentence}`, candidateLabels());
-  return pickNodeType(output);
-}
-
-function candidateLabels(): string[] {
-  return [...CLASSIFIED_NODE_TYPES.map((entry) => entry.description), FALLBACK_NODE_DESCRIPTION];
-}
-
-function pickNodeType(output: { labels: string[]; scores: number[] }): NodeType {
-  const [topDescription] = output.labels;
-  const [topScore] = output.scores;
-  if (topDescription === undefined || topScore === undefined) return FALLBACK_NODE_TYPE;
-  if (topScore < MIN_SCORE) return FALLBACK_NODE_TYPE;
-  return typeForDescription(topDescription);
-}
-
-function typeForDescription(description: string): NodeType {
-  const entry = CLASSIFIED_NODE_TYPES.find((item) => item.description === description);
-  return entry?.type ?? FALLBACK_NODE_TYPE;
+export async function classifyWord(jev: OpenJev, word: string, sentence: string): Promise<NodeType> {
+  const [answer] = await jev.decide(sentence, [
+    choice(
+      `Which type is the word "${word}" in this text?`,
+      NODE_TYPE_OPTIONS,
+      NODE_TYPE_DESCRIPTIONS,
+    ),
+  ]);
+  return answer.confidence < MIN_CONFIDENCE ? FALLBACK_NODE_TYPE : answer.choice;
 }

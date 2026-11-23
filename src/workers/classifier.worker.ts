@@ -1,6 +1,5 @@
 /// <reference lib="webworker" />
 
-import type { ProgressInfo } from "@huggingface/transformers";
 import type {
   ClassifierRequest,
   ClassifierResponse,
@@ -8,15 +7,16 @@ import type {
 import { FALLBACK_NODE_TYPE, type NodeType } from "@/graph/nodeTypes";
 import { classifyWord, loadTextClassifier } from "@/workers/textClassifier";
 
+const MODEL_LABEL = "kev-0.6b";
+
 let requestQueue: Promise<void> = Promise.resolve();
 
 function postResponse(response: ClassifierResponse): void {
   self.postMessage(response);
 }
 
-function forwardProgress(info: ProgressInfo): void {
-  if (info.status !== "progress") return;
-  postResponse({ type: "progress", file: info.file, percent: info.progress });
+function forwardProgress(percent: number): void {
+  postResponse({ type: "progress", file: MODEL_LABEL, percent });
 }
 
 function errorMessage(error: unknown): string {
