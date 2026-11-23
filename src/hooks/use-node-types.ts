@@ -3,8 +3,8 @@ import { readNodeTypes } from "@/graph/readNodeTypes";
 import { runCypher } from "@/graph/relateClient";
 import { NODE_TYPES_QUERY } from "@/graph/sidebarQueries";
 
-/** Queries the distinct node types in the graph when mounted. */
-export function useNodeTypes() {
+/** Queries the distinct node types in the graph when mounted, and again whenever `version` changes. */
+export function useNodeTypes(version: number) {
   const [types, setTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -24,7 +24,7 @@ export function useNodeTypes() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [version]);
 
   return { types, loading, error };
 }
