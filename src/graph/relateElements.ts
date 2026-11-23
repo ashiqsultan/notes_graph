@@ -1,6 +1,7 @@
 // Node and relationship values relate returns inside result rows, and their
 // conversion to the elements NVL draws.
 import type { Node, Relationship } from "@neo4j-nvl/base";
+import { colorForLabel } from "@/graph/nodeColors";
 
 export interface GraphData {
   nodes: Node[];
@@ -38,7 +39,7 @@ export function isRelateRelationship(value: unknown): value is RelateRelationshi
 }
 
 export function toNvlNode(node: RelateNode): Node {
-  return { id: String(node.id), caption: nodeCaption(node) };
+  return { id: String(node.id), caption: nodeCaption(node), color: colorForLabel(node.labels[0]) };
 }
 
 export function toNvlRelationship(rel: RelateRelationship): Relationship {

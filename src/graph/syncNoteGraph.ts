@@ -1,28 +1,16 @@
 import type { Note } from "@/db";
-import { buildMergeCypher } from "@/graph/buildMergeCypher";
 import { deleteNoteGraph } from "@/graph/deleteNoteGraph";
-import { extractNoteGraph } from "@/graph/extractNoteGraph";
+import { getWords } from "@/graph/getWords";
 import {
-  showExtractingToast,
-  showExtractionError,
   showGraphError,
-  showGraphSaved,
-  showModelUnavailable,
   showRemovalError,
   showUnexpectedError,
 } from "@/graph/graphSyncToasts";
-import { runCypher } from "@/graph/relateClient";
-import { isWebGpuAvailable } from "@/lib/llm";
+import { updateNoteGraph } from "@/graph/updateNoteGraph";
 import { getNote } from "@/lib/notes";
 
 let syncChain: Promise<void> = Promise.resolve();
 const waitingNoteIds = new Set<number>();
-
-interface SyncJob {
-  noteId: number;
-  title: string;
-  toastId: string;
-}
 
 /**
  * Queues a graph update for a note. Syncs run one after another, and a note
@@ -57,37 +45,10 @@ async function removeNoteFromGraph(noteId: number): Promise<void> {
 }
 
 async function rebuildNoteGraph(noteId: number, title: string, noteText: string): Promise<void> {
-  if (!isWebGpuAvailable()) {
-    showModelUnavailable(title);
-    return;
-  }
-
-  const job: SyncJob = { noteId, title, toastId: showExtractingToast(title) };
-  const statement = await extractStatement(job, noteText);
-  if (statement !== null) await writeGraph(job, statement);
-}
-
-/**
- * Extraction and query building finish before anything is deleted, so a failed
- * model call never wipes the note's existing graph.
- */
-async function extractStatement(job: SyncJob, noteText: string): Promise<string | null> {
   try {
-    const graph = await extractNoteGraph(noteText);
-    return buildMergeCypher(graph, job.noteId);
+    await updateNoteGraph(noteId, title, getWords(noteText));
   } catch (error) {
-    showExtractionError(job.toastId, job.title, error);
-    return null;
-  }
-}
-
-async function writeGraph(job: SyncJob, statement: string): Promise<void> {
-  try {
-    await deleteNoteGraph(job.noteId);
-    await runCypher(statement);
-    showGraphSaved(job.toastId, job.title);
-  } catch (error) {
-    showGraphError(job.toastId, job.title, error);
+    showGraphError(title, error);
   }
 }
 
