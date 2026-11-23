@@ -1,4 +1,5 @@
 import { useEffect, useEffectEvent, useState } from "react";
+import type { KeyboardEvent } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +9,7 @@ import {
 import { AllNodesList } from "@/components/sidebar/AllNodesList";
 import { CypherQueryForm } from "@/components/sidebar/CypherQueryForm";
 import { GraphResultsTabs } from "@/components/sidebar/GraphResultsTabs";
+import { GraphSearchInput } from "@/components/sidebar/GraphSearchInput";
 import { NodeItemsList } from "@/components/sidebar/NodeItemsList";
 import { SidebarShowAllButton } from "@/components/sidebar/SidebarShowAllButton";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
@@ -66,6 +68,10 @@ function GraphViewFull({
     onRunQuery(query);
   }
 
+  function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") event.preventDefault();
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="h-[90vh] w-[95vw] max-w-none grid-rows-[auto_minmax(0,1fr)] sm:max-w-none">
@@ -73,24 +79,31 @@ function GraphViewFull({
           <DialogTitle>Graph view</DialogTitle>
           {/*<DialogDescription>Full-size view of the sidebar graph.</DialogDescription>*/}
         </DialogHeader>
-        <div className="flex min-h-0 gap-4">
-          <div className="flex w-80 shrink-0 flex-col gap-4 overflow-y-auto">
-            <CypherQueryForm
-              value={queryText}
-              running={running}
-              searchText={searchText}
-              onSearchChange={setSearchText}
-              onChange={onQueryTextChange}
-              onRun={onRunQuery}
+        <div className="flex min-h-0 flex-col gap-4">
+          <div className="mx-auto w-full max-w-xl">
+            <GraphSearchInput
+              value={searchText}
+              onChange={setSearchText}
+              onKeyDown={handleSearchKeyDown}
             />
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <div className="flex align-middle gap-2">
-              <SidebarShowAllButton onClick={onShowAll} disabled={running} />
-              <AllNodesList onSelectType={onSelectType} typesVersion={typesVersion} />
-            </div>
-            <NodeItemsList nodes={entities} onSelectNode={selectNode} />
           </div>
-          <GraphResultsTabs graph={graph} rows={rows} />
+          <div className="flex min-h-0 gap-4">
+            <div className="flex w-80 shrink-0 flex-col gap-4 overflow-y-auto">
+              <CypherQueryForm
+                value={queryText}
+                running={running}
+                onChange={onQueryTextChange}
+                onRun={onRunQuery}
+              />
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <div className="flex align-middle gap-2">
+                <SidebarShowAllButton onClick={onShowAll} disabled={running} />
+                <AllNodesList onSelectType={onSelectType} typesVersion={typesVersion} />
+              </div>
+              <NodeItemsList nodes={entities} onSelectNode={selectNode} />
+            </div>
+            <GraphResultsTabs graph={graph} rows={rows} />
+          </div>
         </div>
       </DialogContent>
     </Dialog>

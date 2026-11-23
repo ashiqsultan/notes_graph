@@ -2,26 +2,16 @@ import type { KeyboardEvent } from "react";
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { GraphSearchInput } from "@/components/sidebar/GraphSearchInput";
 
 interface CypherQueryFormProps {
   value: string;
   running: boolean;
-  searchText: string;
-  onSearchChange: (value: string) => void;
   onChange: (value: string) => void;
   onRun: (query: string) => void;
 }
 
-/** A search box, then a multi-line Cypher editor. Cmd/Ctrl+Enter or the Run button sends the query. */
-function CypherQueryForm({
-  value,
-  running,
-  searchText,
-  onSearchChange,
-  onChange,
-  onRun,
-}: CypherQueryFormProps) {
+/** A multi-line Cypher editor. Cmd/Ctrl+Enter or the Run button sends the query. */
+function CypherQueryForm({ value, running, onChange, onRun }: CypherQueryFormProps) {
   const canRun = !running && value.trim() !== "";
 
   function submit() {
@@ -34,10 +24,6 @@ function CypherQueryForm({
     submit();
   }
 
-  function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Enter") event.preventDefault();
-  }
-
   return (
     <form
       className="flex flex-col gap-2"
@@ -46,11 +32,6 @@ function CypherQueryForm({
         submit();
       }}
     >
-      <GraphSearchInput
-        value={searchText}
-        onChange={onSearchChange}
-        onKeyDown={handleSearchKeyDown}
-      />
       <Textarea
         aria-label="Cypher query"
         placeholder={"MATCH (n)-[r]-(m)\nRETURN n, r, m"}
