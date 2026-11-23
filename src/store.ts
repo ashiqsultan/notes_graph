@@ -1,21 +1,12 @@
 import { create } from "zustand";
 import type { Note } from "@/db";
 import { queueNoteGraphSync } from "@/graph/syncNoteGraph";
+import { preloadClassifier } from "@/graph/classifierClient";
 import {
-  generateText,
-  getLlmWorker,
-  isWebGpuAvailable,
-  postLlmRequest,
-} from "@/lib/llm";
-import type { WorkerResponse } from "@/lib/llmMessages";
-import {
-  createInitialLlmState,
-  failGenerating,
-  finishGenerating,
-  reduceWorkerResponse,
-  startGenerating,
-  type LlmState,
-} from "@/lib/llmState";
+  INITIAL_CLASSIFIER_STATE,
+  reduceClassifierResponse,
+  type ClassifierState,
+} from "@/lib/classifierState";
 import {
   createNote,
   deleteNote,
@@ -24,11 +15,7 @@ import {
   type NoteInput,
 } from "@/lib/notes";
 
-export type AppView = "notes" | "chat";
-
 interface NotesState {
-  /** Which main view is shown: the notes list or the AI chat. */
-  view: AppView;
   /** All notes, most recently updated first. */
   notes: Note[];
   /** Whether the composer dialog is open. */
@@ -39,8 +26,8 @@ interface NotesState {
   composerSession: number;
   /** A saved note whose entities have not been written to the graph yet. */
   unsyncedNoteId: number | null;
-  /** Model download status and the latest chat reply. */
-  llm: LlmState;
+  /** Classifier model download status. */
+  classifier: ClassifierState;
 
   /** Loads all notes from IndexedDB into state. */
   fetchNotes: () => Promise<void>;
@@ -54,24 +41,19 @@ interface NotesState {
   closeComposer: () => void;
   /** Queues the graph update for the note saved in the composer, if any. */
   syncUnsyncedNote: () => void;
-  /** Switches the main view between the notes and the AI chat. */
-  setView: (view: AppView) => void;
-  /** Starts downloading and loading the model. Safe to call more than once. */
-  loadModel: () => void;
-  /** Sends one chat prompt and stores the model's reply. */
-  generateChatReply: (prompt: string) => Promise<void>;
+  /** Starts downloading and loading the classifier model. Safe to call more than once. */
+  loadClassifier: () => void;
 }
 
-let modelLoadStarted = false;
+let classifierLoadStarted = false;
 
 export const useNotesStore = create<NotesState>((set, get) => ({
-  view: "notes",
   notes: [],
   composerOpen: false,
   editingNoteId: null,
   composerSession: 0,
   unsyncedNoteId: null,
-  llm: createInitialLlmState(isWebGpuAvailable()),
+  classifier: INITIAL_CLASSIFIER_STATE,
 
   fetchNotes: async () => {
     const notes = await getAllNotes();
@@ -115,26 +97,12 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     void queueNoteGraphSync(unsyncedNoteId);
   },
 
-  setView: (view) => set({ view }),
+  loadClassifier: () => {
+    if (classifierLoadStarted) return;
+    classifierLoadStarted = true;
 
-  loadModel: () => {
-    if (modelLoadStarted || !isWebGpuAvailable()) return;
-    modelLoadStarted = true;
-
-    getLlmWorker().addEventListener("message", (event: MessageEvent<WorkerResponse>) => {
-      set((state) => ({ llm: reduceWorkerResponse(state.llm, event.data) }));
+    preloadClassifier((response) => {
+      set((state) => ({ classifier: reduceClassifierResponse(state.classifier, response) }));
     });
-    postLlmRequest({ type: "load" });
-  },
-
-  generateChatReply: async (prompt) => {
-    set((state) => ({ llm: startGenerating(state.llm) }));
-    try {
-      const reply = await generateText(prompt);
-      set((state) => ({ llm: finishGenerating(state.llm, reply) }));
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      set((state) => ({ llm: failGenerating(state.llm, message) }));
-    }
   },
 }));

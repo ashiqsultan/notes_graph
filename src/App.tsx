@@ -7,8 +7,7 @@ import { NotesHeader } from "@/components/notes/NotesHeader";
 import { NoteComposer } from "@/components/notes/NoteComposer";
 import { TakeNoteBar } from "@/components/notes/TakeNoteBar";
 import { Toaster } from "@/components/ui/toast";
-import { AiChatView } from "@/components/chat/AiChatView";
-import { ModelDownloadDialog } from "@/components/chat/ModelDownloadDialog";
+import { ModelDownloadDialog } from "@/components/model/ModelDownloadDialog";
 import { useNotesStore } from "@/store";
 import {
   Sidebar,
@@ -19,9 +18,8 @@ import {
 
 function App() {
   const fetchNotes = useNotesStore((state) => state.fetchNotes);
-  const loadModel = useNotesStore((state) => state.loadModel);
-  const llm = useNotesStore((state) => state.llm);
-  const view = useNotesStore((state) => state.view);
+  const loadClassifier = useNotesStore((state) => state.loadClassifier);
+  const classifier = useNotesStore((state) => state.classifier);
   const { width: sidebarWidth, startResize } = useSidebarResize();
 
   useEffect(() => {
@@ -29,8 +27,8 @@ function App() {
   }, [fetchNotes]);
 
   useEffect(() => {
-    loadModel();
-  }, [loadModel]);
+    loadClassifier();
+  }, [loadClassifier]);
 
   return (
     <SidebarProvider
@@ -43,16 +41,14 @@ function App() {
         <SidebarResizeHandle onPointerDown={startResize} />
       </Sidebar>
       <SidebarInset>
-        <ModelDownloadDialog open={llm.status === "loading"} progress={llm.progress} />
+        <ModelDownloadDialog
+          open={classifier.status === "loading"}
+          progress={classifier.progress}
+        />
         <NotesHeader />
         <div className="mx-auto w-full max-w-5xl px-4 py-6">
-            {view === "chat" && <AiChatView />}
-          {view === "notes" && (
-            <>
-              <TakeNoteBar />
-              <NotesGrid />
-            </>
-          )}
+          <TakeNoteBar />
+          <NotesGrid />
         </div>
         <NoteComposer />
         <Toaster />

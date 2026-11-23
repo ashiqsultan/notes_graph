@@ -1,4 +1,8 @@
-import { pipeline, type ZeroShotClassificationPipeline } from "@huggingface/transformers";
+import {
+  pipeline,
+  type ProgressCallback,
+  type ZeroShotClassificationPipeline,
+} from "@huggingface/transformers";
 import {
   CLASSIFIED_NODE_TYPES,
   FALLBACK_NODE_TYPE,
@@ -11,8 +15,12 @@ const MIN_SCORE = 0.5;
 let classifierPromise: Promise<ZeroShotClassificationPipeline> | null = null;
 
 /** Creates the zero-shot classification pipeline once and reuses it afterwards. */
-export function loadTextClassifier(): Promise<ZeroShotClassificationPipeline> {
-  classifierPromise ??= pipeline("zero-shot-classification", MODEL_ID);
+export function loadTextClassifier(
+  onProgress?: ProgressCallback,
+): Promise<ZeroShotClassificationPipeline> {
+  classifierPromise ??= pipeline("zero-shot-classification", MODEL_ID, {
+    progress_callback: onProgress,
+  });
   return classifierPromise;
 }
 
