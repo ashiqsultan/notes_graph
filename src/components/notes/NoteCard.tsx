@@ -10,12 +10,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DeleteNoteDialog } from "@/components/notes/DeleteNoteDialog";
+import { NoteTypeDots } from "@/components/notes/NoteTypeDots";
 import type { Note } from "@/db";
 import { formatRelativeTime } from "@/lib/format";
 import { useNotesStore } from "@/store";
 
 /** A single note in the grid. Clicking it opens the composer in edit mode. */
-function NoteCard({ note }: { note: Note }) {
+function NoteCard({ note, nodeTypes }: { note: Note; nodeTypes: string[] }) {
   const openComposer = useNotesStore((state) => state.openComposer);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -49,8 +50,9 @@ function NoteCard({ note }: { note: Note }) {
             </p>
           </CardContent>
         )}
-        <CardFooter className="text-xs text-muted-foreground">
-          Updated {formatRelativeTime(note.updatedAt)}
+        <CardFooter className="justify-between text-xs text-muted-foreground">
+          <NoteTypeDots types={nodeTypes} />
+          <span>Updated {formatRelativeTime(note.updatedAt)}</span>
         </CardFooter>
       </Card>
       <DeleteNoteDialog

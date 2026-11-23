@@ -28,9 +28,13 @@ interface NotesState {
   unsyncedNoteId: number | null;
   /** Classifier model download status. */
   classifier: ClassifierState;
+  /** Increments whenever the graph changes, so views of graph data can reload. */
+  graphVersion: number;
 
   /** Loads all notes from IndexedDB into state. */
   fetchNotes: () => Promise<void>;
+  /** Marks the graph as changed, e.g. after a node type is renamed or deleted. */
+  notifyGraphChanged: () => void;
   /** Creates or updates a note (depending on `editingNoteId`) without closing the composer. */
   persistNote: (input: NoteInput) => Promise<void>;
   /** Deletes a note from IndexedDB and state, and removes it from the graph. */
@@ -41,6 +45,8 @@ interface NotesState {
   closeComposer: () => void;
   /** Queues the graph update for the note saved in the composer, if any. */
   syncUnsyncedNote: () => void;
+  /** Queues a graph update for a note and bumps `graphVersion` once it has run. */
+  syncGraph: (noteId: number) => void;
   /** Starts downloading and loading the classifier model. Safe to call more than once. */
   loadClassifier: () => void;
 }
@@ -54,10 +60,17 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   composerSession: 0,
   unsyncedNoteId: null,
   classifier: INITIAL_CLASSIFIER_STATE,
+  graphVersion: 0,
 
   fetchNotes: async () => {
     const notes = await getAllNotes();
     set({ notes });
+  },
+
+  notifyGraphChanged: () => set((state) => ({ graphVersion: state.graphVersion + 1 })),
+
+  syncGraph: (noteId) => {
+    void queueNoteGraphSync(noteId).then(() => get().notifyGraphChanged());
   },
 
   persistNote: async (input) => {
@@ -77,7 +90,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   removeNote: async (id) => {
     await deleteNote(id);
     await get().fetchNotes();
-    void queueNoteGraphSync(id);
+    get().syncGraph(id);
   },
 
   openComposer: (noteId) =>
@@ -94,7 +107,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     if (unsyncedNoteId === null) return;
 
     set({ unsyncedNoteId: null });
-    void queueNoteGraphSync(unsyncedNoteId);
+    get().syncGraph(unsyncedNoteId);
   },
 
   loadClassifier: () => {

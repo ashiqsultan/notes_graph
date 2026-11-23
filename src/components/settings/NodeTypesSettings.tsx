@@ -24,6 +24,7 @@ import {
   seedNodeTypesIfNeeded,
   type NodeTypeInput,
 } from "@/lib/nodeTypes";
+import { useNotesStore } from "@/store";
 
 interface Draft {
   /** Set when editing an existing entry; undefined when adding a new one. */
@@ -41,6 +42,7 @@ function NodeTypesSettings() {
   const [loading, setLoading] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [pendingDelete, setPendingDelete] = useState<NodeTypeEntry | null>(null);
+  const notifyGraphChanged = useNotesStore((state) => state.notifyGraphChanged);
 
   useEffect(() => {
     if (!open) return;
@@ -85,6 +87,7 @@ function NodeTypesSettings() {
     const saved = await attempt(() => writeDraft(draft, input));
     if (!saved) return;
     toast.add({ title: draft.id === undefined ? "Node type added" : "Node type saved", type: "success" });
+    notifyGraphChanged();
     setDraft(null);
     await load();
   }
@@ -94,6 +97,7 @@ function NodeTypesSettings() {
     const removed = await attempt(() => removeNodeType(entry));
     if (!removed) return;
     toast.add({ title: "Node type deleted", type: "success" });
+    notifyGraphChanged();
     if (draft?.id === entry.id) setDraft(null);
     await load();
   }
