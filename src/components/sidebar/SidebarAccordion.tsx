@@ -7,17 +7,17 @@ import {
 import { AllNodesList } from "@/components/sidebar/AllNodesList";
 
 interface SidebarAccordionProps {
-  onSelectNode: (nodeId: string) => void;
+  onSelectType: (type: string) => void;
 }
 
-/** Sidebar accordions that list the graph's nodes. */
-function SidebarAccordion({ onSelectNode }: SidebarAccordionProps) {
+/** Sidebar accordions that list the graph's node types. */
+function SidebarAccordion({ onSelectType }: SidebarAccordionProps) {
   return (
     <Accordion>
       <AccordionItem value="all-nodes">
         <AccordionTrigger>All Nodes</AccordionTrigger>
         <AccordionContent>
-          <AllNodesList onSelect={onSelectNode} />
+          <AllNodesList onSelectType={onSelectType} />
         </AccordionContent>
       </AccordionItem>
     </Accordion>

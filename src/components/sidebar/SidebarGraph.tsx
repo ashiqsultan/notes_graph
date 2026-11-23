@@ -8,9 +8,9 @@ import { GraphViewFull } from "@/components/sidebar/GraphViewFull";
 import { runCypher } from "@/graph/relateClient";
 import { graphFromEnvelope } from "@/graph/graphFromEnvelope";
 import { EMPTY_GRAPH, type GraphData } from "@/graph/relateElements";
-import { SHOW_ALL_QUERY, nodeWithRelationsQuery } from "@/graph/sidebarQueries";
+import { SHOW_ALL_QUERY, nodesOfTypeQuery } from "@/graph/sidebarQueries";
 
-/** Sidebar graph section: a "Show all" button, the node and relation lists, and the graph they load. */
+/** Sidebar graph section: a "Show all" button, the node type pills, and the graph they load. */
 function SidebarGraph() {
   const [graph, setGraph] = useState<GraphData>(EMPTY_GRAPH);
   const [running, setRunning] = useState(false);
@@ -34,7 +34,7 @@ function SidebarGraph() {
   const controls = (
     <>
       <SidebarShowAllButton onClick={() => void runStatement(SHOW_ALL_QUERY)} disabled={running} />
-      <SidebarAccordion onSelectNode={(nodeId) => void runStatement(nodeWithRelationsQuery(nodeId))} />
+      <SidebarAccordion onSelectType={(type) => void runStatement(nodesOfTypeQuery(type))} />
       {error && <p className="text-sm text-destructive">{error}</p>}
     </>
   );

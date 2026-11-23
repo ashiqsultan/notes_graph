@@ -1,32 +1,24 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { useGraphList } from "@/hooks/use-graph-list";
-import { ALL_NODES_QUERY } from "@/graph/sidebarQueries";
+import { NodeTypePill } from "@/components/sidebar/NodeTypePill";
+import { useNodeTypes } from "@/hooks/use-node-types";
 
 interface AllNodesListProps {
-  onSelect: (nodeId: string) => void;
+  onSelectType: (type: string) => void;
 }
 
-/** Lists every node in the graph. Clicking one shows it with its relations. */
-function AllNodesList({ onSelect }: AllNodesListProps) {
-  const { graph, loading, error } = useGraphList(ALL_NODES_QUERY);
+/** Shows a pill for each node type in the graph. Clicking one shows every node of that type. */
+function AllNodesList({ onSelectType }: AllNodesListProps) {
+  const { types, loading, error } = useNodeTypes();
 
   if (loading) return <p className="text-sm text-muted-foreground">Loading…</p>;
   if (error) return <p className="text-sm text-destructive">{error}</p>;
-  if (graph.nodes.length === 0) return <p className="text-sm text-muted-foreground">No nodes</p>;
+  if (types.length === 0) return <p className="text-sm text-muted-foreground">No nodes</p>;
 
   return (
-    <ScrollArea className="h-60">
-      <SidebarMenu>
-        {graph.nodes.map((node) => (
-          <SidebarMenuItem key={node.id}>
-            <SidebarMenuButton onClick={() => onSelect(node.id)}>
-              {node.caption ?? node.id}
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        ))}
-      </SidebarMenu>
-    </ScrollArea>
+    <div className="flex flex-wrap gap-1.5">
+      {types.map((type) => (
+        <NodeTypePill key={type} type={type} onSelect={onSelectType} />
+      ))}
+    </div>
   );
 }
 

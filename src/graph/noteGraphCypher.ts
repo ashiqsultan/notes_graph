@@ -55,7 +55,7 @@ function quoteList(values: string[]): string {
   return `[${values.map(quote).join(", ")}]`;
 }
 
-function quote(value: string): string {
+export function quote(value: string): string {
   const escaped = value
     .replace(/\\/g, "\\\\")
     .replace(/'/g, "\\'")
