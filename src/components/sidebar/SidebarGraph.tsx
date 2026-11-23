@@ -5,11 +5,13 @@ import { SidebarShowAllButton } from "@/components/sidebar/SidebarShowAllButton"
 import { SidebarGraphCanvas } from "@/components/sidebar/SidebarGraphCanvas";
 import { AllNodesList } from "@/components/sidebar/AllNodesList";
 import { GraphViewFull } from "@/components/sidebar/GraphViewFull";
+import { NodeItemsList } from "@/components/sidebar/NodeItemsList";
 import { envelopeError, envelopeRows } from "@/graph/envelopeRows";
 import { runCypher } from "@/graph/relateClient";
 import { graphFromEnvelope } from "@/graph/graphFromEnvelope";
-import { EMPTY_GRAPH, type GraphData } from "@/graph/relateElements";
-import { SHOW_ALL_QUERY, nodesOfTypeQuery } from "@/graph/sidebarQueries";
+import { entityItemsFromRows } from "@/graph/nodeItems";
+import { EMPTY_GRAPH, type GraphData, type RelateNode } from "@/graph/relateElements";
+import { SHOW_ALL_QUERY, nodeConnectionsQuery, nodesOfTypeQuery } from "@/graph/sidebarQueries";
 
 /** Sidebar graph section: a "Show all" button, the node type pills, and the graph they load. */
 function SidebarGraph() {
@@ -53,15 +55,19 @@ function SidebarGraph() {
     void runStatement(query);
   }
 
+  function selectNode(node: RelateNode) {
+    runQuery(nodeConnectionsQuery(node.id));
+  }
+
+  const entities = entityItemsFromRows(rows);
+
   const controls = (
     <>
-      <div className="flex gap-2">
-        <SidebarShowAllButton onClick={showAll} disabled={running} className="flex-1" />
-        <Button type="button" variant="ghost" size="sm" className="flex-1" onClick={() => setExpanded(true)}>
-          Expand
-          <Maximize2 />
-        </Button>
-      </div>
+      <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setExpanded(true)}>
+        Expand
+        <Maximize2 />
+      </Button>
+      <SidebarShowAllButton onClick={showAll} disabled={running} className="w-full" />
       <AllNodesList onSelectType={showType} typesVersion={typesVersion} />
       {error && <p className="text-sm text-destructive">{error}</p>}
     </>
@@ -71,6 +77,7 @@ function SidebarGraph() {
     <div className="flex flex-col gap-2 p-2">
       {controls}
       <SidebarGraphCanvas graph={graph} className="mt-2" />
+      <NodeItemsList nodes={entities} onSelectNode={selectNode} />
       <GraphViewFull
         open={expanded}
         onOpenChange={setExpanded}

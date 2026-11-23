@@ -18,7 +18,7 @@ function stopResizing(handleMove: (event: globalThis.PointerEvent) => void) {
 
 export function useSidebarResize({
   defaultWidth = 256,
-  minWidth = 200,
+  minWidth = 320,
   maxWidth = 480,
 }: SidebarResizeOptions = {}) {
   const [width, setWidth] = useState(() =>
