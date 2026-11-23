@@ -10,7 +10,7 @@ import { GraphResultsTabs } from "@/components/sidebar/GraphResultsTabs";
 import { GraphSearchInput } from "@/components/sidebar/GraphSearchInput";
 import { NodeItemsList } from "@/components/sidebar/NodeItemsList";
 import { SidebarShowAllButton } from "@/components/sidebar/SidebarShowAllButton";
-import { entityItemsFromRows } from "@/graph/nodeItems";
+import { listableNodesFromRows } from "@/graph/nodeItems";
 import { nodeConnectionsQuery } from "@/graph/sidebarQueries";
 import type { GraphData, RelateNode } from "@/graph/relateElements";
 
@@ -48,7 +48,7 @@ function GraphViewFull({
   onSelectType,
   onRunQuery,
 }: GraphViewFullProps) {
-  const entities = entityItemsFromRows(rows);
+  const listableNodes = listableNodesFromRows(rows);
 
   function selectNode(node: RelateNode) {
     const query = nodeConnectionsQuery(node.id);
@@ -80,7 +80,7 @@ function GraphViewFull({
                 <SidebarShowAllButton onClick={onShowAll} disabled={running} />
                 <AllNodesList onSelectType={onSelectType} typesVersion={typesVersion} />
               </div>
-              <NodeItemsList nodes={entities} onSelectNode={selectNode} />
+              <NodeItemsList nodes={listableNodes} onSelectNode={selectNode} />
             </div>
             <GraphResultsTabs graph={graph} rows={rows} />
           </div>

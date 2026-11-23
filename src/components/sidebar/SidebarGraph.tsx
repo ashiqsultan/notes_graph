@@ -10,7 +10,7 @@ import { NodeItemsList } from "@/components/sidebar/NodeItemsList";
 import { envelopeError, envelopeRows } from "@/graph/envelopeRows";
 import { runCypher } from "@/graph/relateClient";
 import { graphFromEnvelope } from "@/graph/graphFromEnvelope";
-import { entityItemsFromRows } from "@/graph/nodeItems";
+import { listableNodesFromRows } from "@/graph/nodeItems";
 import { EMPTY_GRAPH, type GraphData, type RelateNode } from "@/graph/relateElements";
 import { SHOW_ALL_QUERY, nodeConnectionsQuery, nodesOfTypeQuery } from "@/graph/sidebarQueries";
 import { useGraphSearch } from "@/hooks/useGraphSearch";
@@ -62,7 +62,7 @@ function SidebarGraph() {
     runQuery(nodeConnectionsQuery(node.id));
   }
 
-  const entities = entityItemsFromRows(rows);
+  const listableNodes = listableNodesFromRows(rows);
 
   const controls = (
     <>
@@ -81,7 +81,7 @@ function SidebarGraph() {
     <div className="flex flex-col gap-2 p-2">
       {controls}
       <SidebarGraphCanvas graph={graph} className="mt-2" />
-      <NodeItemsList nodes={entities} onSelectNode={selectNode} />
+      <NodeItemsList nodes={listableNodes} onSelectNode={selectNode} />
       <GraphViewFull
         open={expanded}
         onOpenChange={setExpanded}

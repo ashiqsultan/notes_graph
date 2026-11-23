@@ -1,5 +1,5 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { entityName, entityType } from "@/graph/nodeItems";
+import { nodeName, nodeType } from "@/graph/nodeItems";
 import type { RelateNode } from "@/graph/relateElements";
 import { colorForLabel } from "@/graph/nodeColors";
 
@@ -8,9 +8,9 @@ interface NodeItemsListProps {
   onSelectNode: (node: RelateNode) => void;
 }
 
-/** A scrollable list of the entities in the current result. Clicking one shows its direct connections. */
+/** A scrollable list of the nodes in the current result. Clicking one shows its direct connections. */
 function NodeItemsList({ nodes, onSelectNode }: NodeItemsListProps) {
-  if (nodes.length === 0) return <p className="text-sm text-muted-foreground">No entities</p>;
+  if (nodes.length === 0) return <p className="text-sm text-muted-foreground">No nodes</p>;
 
   return (
     <ScrollArea className="h-64 rounded-md border">
@@ -24,10 +24,10 @@ function NodeItemsList({ nodes, onSelectNode }: NodeItemsListProps) {
             >
               <span
                 className="size-2.5 shrink-0 rounded-full"
-                style={{ backgroundColor: colorForLabel(entityType(node)) }}
+                style={{ backgroundColor: colorForLabel(nodeType(node)) }}
               />
-              <span className="truncate">{entityName(node)}</span>
-              <span className="ml-auto shrink-0 text-xs text-muted-foreground">{entityType(node)}</span>
+              <span className="truncate">{nodeName(node)}</span>
+              <span className="ml-auto shrink-0 text-xs text-muted-foreground">{nodeType(node)}</span>
             </button>
           </li>
         ))}
