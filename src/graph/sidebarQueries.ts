@@ -9,6 +9,16 @@ export const NODE_TYPES_QUERY = [
   "ORDER BY type",
 ].join("\n");
 
+/** Returns one node by its id, together with every relationship it has to its direct neighbours. */
+export function nodeConnectionsQuery(nodeId: number): string {
+  return [
+    "MATCH (n)",
+    `WHERE id(n) = ${nodeId}`,
+    "OPTIONAL MATCH (n)-[r]-(m)",
+    "RETURN n, r, m",
+  ].join("\n");
+}
+
 /** Returns every node of one type, together with every relationship each one has. */
 export function nodesOfTypeQuery(type: string): string {
   return [

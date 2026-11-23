@@ -7,8 +7,11 @@ import {
 import { AllNodesList } from "@/components/sidebar/AllNodesList";
 import { CypherQueryForm } from "@/components/sidebar/CypherQueryForm";
 import { GraphResultsTabs } from "@/components/sidebar/GraphResultsTabs";
+import { NodeItemsList } from "@/components/sidebar/NodeItemsList";
 import { SidebarShowAllButton } from "@/components/sidebar/SidebarShowAllButton";
-import type { GraphData } from "@/graph/relateElements";
+import { entityItemsFromRows } from "@/graph/nodeItems";
+import { nodeConnectionsQuery } from "@/graph/sidebarQueries";
+import type { GraphData, RelateNode } from "@/graph/relateElements";
 
 interface GraphViewFullProps {
   open: boolean;
@@ -40,6 +43,14 @@ function GraphViewFull({
   onSelectType,
   onRunQuery,
 }: GraphViewFullProps) {
+  const entities = entityItemsFromRows(rows);
+
+  function selectNode(node: RelateNode) {
+    const query = nodeConnectionsQuery(node.id);
+    onQueryTextChange(query);
+    onRunQuery(query);
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="h-[90vh] w-[95vw] max-w-none grid-rows-[auto_minmax(0,1fr)] sm:max-w-none">
@@ -60,6 +71,7 @@ function GraphViewFull({
               <SidebarShowAllButton onClick={onShowAll} disabled={running} />
               <AllNodesList onSelectType={onSelectType} typesVersion={typesVersion} />
             </div>
+            <NodeItemsList nodes={entities} onSelectNode={selectNode} />
           </div>
           <GraphResultsTabs graph={graph} rows={rows} />
         </div>
