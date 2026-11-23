@@ -9,7 +9,7 @@ import {
   type NodeType,
 } from "@/graph/nodeTypes";
 
-const MODEL_ID = "Xenova/mobilebert-uncased-mnli";
+const MODEL_ID = "Xenova/roberta-large-mnli";
 const MIN_SCORE = 0.5;
 
 let classifierPromise: Promise<ZeroShotClassificationPipeline> | null = null;

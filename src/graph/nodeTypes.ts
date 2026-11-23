@@ -3,11 +3,10 @@ export const FALLBACK_NODE_TYPE = "Entity";
 
 /** Types a word can be classified as. The description is what the model reads. */
 export const CLASSIFIED_NODE_TYPES = [
-  { type: "Person", description: "a person's name" },
-  { type: "Place", description: "a city, country, or other location" },
-  { type: "Date_Time", description: "a date, time, or period" },
-  { type: "Project", description: "a project, task, or piece of work" },
-  { type: "Technology", description: "a tool, software, or technology" },
+  { type: "Person", description: "a Human Name" },
+  { type: "Place", description: "a city, country, or any place or location" },
+  { type: "Date_Time", description: "date or time" },
+  { type: "Technology", description: "a tool, software, or technology like AI programming language" },
 ] as const;
 
 export type NodeType =
