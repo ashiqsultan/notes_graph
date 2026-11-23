@@ -19,6 +19,28 @@ export function nodeConnectionsQuery(nodeId: number): string {
   ].join("\n");
 }
 
+const SEARCHED_PROPERTIES = ["name", "key", "type"];
+
+/** Returns the nodes whose name, key or type contains any word of the text, or null when the text is blank. */
+export function nodeSearchQuery(text: string): string | null {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return null;
+
+  const conditions = words.flatMap((word) =>
+    SEARCHED_PROPERTIES.map((property) => containsCondition(property, word))
+  );
+  return [
+    "MATCH (n)",
+    `WHERE ${conditions.join(" OR ")}`,
+    "OPTIONAL MATCH (n)-[r]-(m)",
+    "RETURN n, r, m",
+  ].join("\n");
+}
+
+function containsCondition(property: string, word: string): string {
+  return `toLower(coalesce(n.${property}, '')) CONTAINS toLower(${quote(word)})`;
+}
+
 /** Returns every node of one type, together with every relationship each one has. */
 export function nodesOfTypeQuery(type: string): string {
   return [

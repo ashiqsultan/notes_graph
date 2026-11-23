@@ -1,3 +1,4 @@
+import { useEffect, useEffectEvent, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,9 +10,12 @@ import { CypherQueryForm } from "@/components/sidebar/CypherQueryForm";
 import { GraphResultsTabs } from "@/components/sidebar/GraphResultsTabs";
 import { NodeItemsList } from "@/components/sidebar/NodeItemsList";
 import { SidebarShowAllButton } from "@/components/sidebar/SidebarShowAllButton";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { entityItemsFromRows } from "@/graph/nodeItems";
-import { nodeConnectionsQuery } from "@/graph/sidebarQueries";
+import { nodeConnectionsQuery, nodeSearchQuery } from "@/graph/sidebarQueries";
 import type { GraphData, RelateNode } from "@/graph/relateElements";
+
+const SEARCH_DELAY_MS = 500;
 
 interface GraphViewFullProps {
   open: boolean;
@@ -43,7 +47,18 @@ function GraphViewFull({
   onSelectType,
   onRunQuery,
 }: GraphViewFullProps) {
+  const [searchText, setSearchText] = useState("");
+  const debouncedSearch = useDebouncedValue(searchText, SEARCH_DELAY_MS);
   const entities = entityItemsFromRows(rows);
+
+  const runSearch = useEffectEvent((text: string) => {
+    const query = nodeSearchQuery(text);
+    if (query) onRunQuery(query);
+  });
+
+  useEffect(() => {
+    runSearch(debouncedSearch);
+  }, [debouncedSearch]);
 
   function selectNode(node: RelateNode) {
     const query = nodeConnectionsQuery(node.id);
@@ -63,6 +78,8 @@ function GraphViewFull({
             <CypherQueryForm
               value={queryText}
               running={running}
+              searchText={searchText}
+              onSearchChange={setSearchText}
               onChange={onQueryTextChange}
               onRun={onRunQuery}
             />
