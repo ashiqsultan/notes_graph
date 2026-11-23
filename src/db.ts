@@ -11,9 +11,21 @@ interface Note {
   updatedAt: number;
 }
 
+interface NodeTypeEntry {
+  id: number;
+  /** The node type name, such as Person. */
+  type: string;
+  /** The description the classifier model reads for this type. */
+  description: string;
+}
+
 const db = new Dexie("NotesDB") as Dexie & {
   notes: EntityTable<
     Note,
+    "id" // primary key "id" (for the typings only)
+  >;
+  nodeTypes: EntityTable<
+    NodeTypeEntry,
     "id" // primary key "id" (for the typings only)
   >;
 };
@@ -22,6 +34,9 @@ const db = new Dexie("NotesDB") as Dexie & {
 db.version(1).stores({
   notes: "++id, createdAt, updatedAt", // primary key "id" (for the runtime!)
 });
+db.version(2).stores({
+  nodeTypes: "++id, type", // primary key "id" (for the runtime!)
+});
 
-export type { Note };
+export type { Note, NodeTypeEntry };
 export { db };

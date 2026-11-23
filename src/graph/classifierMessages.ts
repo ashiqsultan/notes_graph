@@ -1,9 +1,15 @@
-import type { NodeType } from "@/graph/nodeTypes";
+import type { NodeType, NodeTypeDefinition } from "@/graph/nodeTypes";
 
 /** Messages the main thread sends to the classifier worker. */
 export type ClassifierRequest =
   | { type: "load" }
-  | { type: "classify"; id: number; word: string; sentence: string };
+  | {
+      type: "classify";
+      id: number;
+      word: string;
+      sentence: string;
+      nodeTypes: NodeTypeDefinition[];
+    };
 
 /** Messages reported while the classifier model loads. */
 export type ClassifierLoadResponse =

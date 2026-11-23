@@ -1,23 +1,12 @@
 import { OpenJev, choice } from "open-jev";
 import {
-  CLASSIFIED_NODE_TYPES,
   FALLBACK_NODE_DESCRIPTION,
   FALLBACK_NODE_TYPE,
-  type NodeType,
+  type NodeTypeDefinition,
 } from "@/graph/nodeTypes";
 
 const MODEL_ID = "onnx-community/kev-0.6b-ONNX";
 const MIN_CONFIDENCE = 0.5;
-
-const NODE_TYPE_OPTIONS: NodeType[] = [
-  ...CLASSIFIED_NODE_TYPES.map((entry) => entry.type),
-  FALLBACK_NODE_TYPE,
-];
-
-const NODE_TYPE_DESCRIPTIONS: Partial<Record<NodeType, string>> = {
-  ...Object.fromEntries(CLASSIFIED_NODE_TYPES.map((entry) => [entry.type, entry.description])),
-  [FALLBACK_NODE_TYPE]: FALLBACK_NODE_DESCRIPTION,
-};
 
 let jevPromise: Promise<OpenJev> | null = null;
 
@@ -31,14 +20,26 @@ export function loadTextClassifier(onProgress?: (percent: number) => void): Prom
   return jevPromise;
 }
 
+/** The type names and their descriptions the classifier chooses between. */
+function toOptions(nodeTypes: NodeTypeDefinition[]) {
+  const options = [...nodeTypes.map((entry) => entry.type), FALLBACK_NODE_TYPE];
+  const descriptions = {
+    ...Object.fromEntries(nodeTypes.map((entry) => [entry.type, entry.description])),
+    [FALLBACK_NODE_TYPE]: FALLBACK_NODE_DESCRIPTION,
+  };
+  return { options, descriptions };
+}
+
 /** Classifies a word by the sentence it appears in. Returns the fallback type when unsure. */
-export async function classifyWord(jev: OpenJev, word: string, sentence: string): Promise<NodeType> {
+export async function classifyWord(
+  jev: OpenJev,
+  word: string,
+  sentence: string,
+  nodeTypes: NodeTypeDefinition[],
+): Promise<string> {
+  const { options, descriptions } = toOptions(nodeTypes);
   const [answer] = await jev.decide(sentence, [
-    choice(
-      `Which type is the word "${word}" in this text?`,
-      NODE_TYPE_OPTIONS,
-      NODE_TYPE_DESCRIPTIONS,
-    ),
+    choice(`Which type is the word "${word}" in this text?`, options, descriptions),
   ]);
   return answer.confidence < MIN_CONFIDENCE ? FALLBACK_NODE_TYPE : answer.choice;
 }

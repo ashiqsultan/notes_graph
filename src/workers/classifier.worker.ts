@@ -4,7 +4,7 @@ import type {
   ClassifierRequest,
   ClassifierResponse,
 } from "@/graph/classifierMessages";
-import { FALLBACK_NODE_TYPE, type NodeType } from "@/graph/nodeTypes";
+import { FALLBACK_NODE_TYPE, type NodeTypeDefinition } from "@/graph/nodeTypes";
 import { classifyWord, loadTextClassifier } from "@/workers/textClassifier";
 
 const MODEL_LABEL = "kev-0.6b";
@@ -35,14 +35,18 @@ async function handleLoad(): Promise<void> {
 async function handleClassify(
   request: Extract<ClassifierRequest, { type: "classify" }>,
 ): Promise<void> {
-  const nodeType = await classifySafely(request.word, request.sentence);
+  const nodeType = await classifySafely(request.word, request.sentence, request.nodeTypes);
   postResponse({ type: "classified", id: request.id, nodeType });
 }
 
-async function classifySafely(word: string, sentence: string): Promise<NodeType> {
+async function classifySafely(
+  word: string,
+  sentence: string,
+  nodeTypes: NodeTypeDefinition[],
+): Promise<string> {
   try {
     const classifier = await loadTextClassifier();
-    return await classifyWord(classifier, word, sentence);
+    return await classifyWord(classifier, word, sentence, nodeTypes);
   } catch {
     return FALLBACK_NODE_TYPE;
   }

@@ -40,6 +40,14 @@ export function deleteNoteStatement(noteId: number): string {
   return `MATCH (n:Note {key: ${quote(String(noteId))}}) DETACH DELETE n`;
 }
 
+/** Gives every entity of the old type the new type. */
+export function setEntityTypeStatement(oldType: string, newType: string): string {
+  return [
+    `MATCH (e:Entity {type: ${quote(oldType)}})`,
+    `SET e.type = ${quote(newType)}`,
+  ].join("\n");
+}
+
 /** Deletes the given words that no note mentions any more. */
 export function removeOrphansStatement(keys: string[]): string {
   return [

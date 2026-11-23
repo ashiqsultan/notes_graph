@@ -8,10 +8,12 @@ import { NoteComposer } from "@/components/notes/NoteComposer";
 import { TakeNoteBar } from "@/components/notes/TakeNoteBar";
 import { Toaster } from "@/components/ui/toast";
 import { ModelDownloadDialog } from "@/components/model/ModelDownloadDialog";
+import { NodeTypesSettings } from "@/components/settings/NodeTypesSettings";
 import { useNotesStore } from "@/store";
 import {
   Sidebar,
   SidebarContent,
+  SidebarHeader,
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar";
@@ -36,6 +38,9 @@ function App() {
     >
       <Sidebar>
         <SidebarContent>
+          <SidebarHeader>
+            <NodeTypesSettings />
+          </SidebarHeader>
           <SidebarGraph />
         </SidebarContent>
         <SidebarResizeHandle onPointerDown={startResize} />

@@ -5,9 +5,9 @@ import type {
   ClassifierRequest,
   ClassifierResponse,
 } from "@/graph/classifierMessages";
-import { FALLBACK_NODE_TYPE, type NodeType } from "@/graph/nodeTypes";
+import { FALLBACK_NODE_TYPE, type NodeTypeDefinition } from "@/graph/nodeTypes";
 
-type PendingClassification = (type: NodeType) => void;
+type PendingClassification = (type: string) => void;
 type LoadListener = (response: ClassifierLoadResponse) => void;
 
 let worker: Worker | null = null;
@@ -41,7 +41,7 @@ function handleResponse(response: ClassifierResponse): void {
   loadListener?.(response);
 }
 
-function settleClassification(id: number, nodeType: NodeType): void {
+function settleClassification(id: number, nodeType: string): void {
   const resolve = pending.get(id);
   pending.delete(id);
   resolve?.(nodeType);
@@ -63,10 +63,14 @@ export function preloadClassifier(listener: LoadListener): void {
 }
 
 /** Returns the type of a word, judged by the sentence it appears in. */
-export function classifyText(word: string, sentence: string): Promise<NodeType> {
+export function classifyText(
+  word: string,
+  sentence: string,
+  nodeTypes: NodeTypeDefinition[],
+): Promise<string> {
   return new Promise((resolve) => {
     const id = nextId++;
     pending.set(id, resolve);
-    postRequest({ type: "classify", id, word, sentence });
+    postRequest({ type: "classify", id, word, sentence, nodeTypes });
   });
 }

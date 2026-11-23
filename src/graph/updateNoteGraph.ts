@@ -7,6 +7,7 @@ import {
   upsertNoteStatement,
 } from "@/graph/noteGraphCypher";
 import { readLinkedKeys, runWrite } from "@/graph/noteGraphClient";
+import { getNodeTypeOptions } from "@/lib/nodeTypes";
 
 /**
  * Makes the graph match a note's words. Words the note already links to are
@@ -22,7 +23,8 @@ export async function updateNoteGraph(
   const linkedKeys = await readLinkedKeys(noteId);
   const { toAdd, toRemove } = planWordChanges(linkedKeys, words);
 
-  const typedWords = await classifyWords(toAdd, noteText);
+  const nodeTypes = await getNodeTypeOptions();
+  const typedWords = await classifyWords(toAdd, noteText, nodeTypes);
   await runWrite(upsertNoteStatement(noteId, title, typedWords));
   if (toRemove.length === 0) return;
 
