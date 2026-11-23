@@ -1,10 +1,13 @@
 import type { GraphSchema } from "@/graph/readSchema";
 
 const RULES = [
-  "You translate questions into one Cypher query for a graph database.",
-  "Reply with the Cypher query only: no explanation, no markdown.",
+  "You are a Neo4j Cypher query expert, You are provided with the Available Node Types and Relationships in a Graph DB",
+  "Your only job is to translate the user question into a Cypher query",
+  'Reply with a JSON object only, in exactly this format: {"cypher_query": "<cypher query here>"}',
+  "Put the whole Cypher query as one string in cypher_query.",
+  "No explanation, no markdown, no code fences.",
   "Use only the node labels and relationship types listed below.",
-  "When trying to match strings it should NOT be case sensitive, Please match both lowercase and uppercase",
+  "When trying to match strings it should NOT be case sensitive",
   "The query must be read-only: use MATCH, OPTIONAL MATCH, WHERE, WITH, RETURN, ORDER BY and LIMIT only.",
   "Never use CREATE, MERGE, DELETE, DETACH, SET, REMOVE, DROP, LOAD CSV or CALL.",
   "When the question asks about things or how they connect, return the matching nodes and relationships so they can be drawn.",
@@ -12,10 +15,15 @@ const RULES = [
 
 const EXAMPLES = [
   "Question: What is connected to the node named Alpha?",
-  "Cypher: MATCH (n {name: 'Alpha'})-[r]-(m) RETURN n, r, m",
+  '{"cypher_query": "MATCH (n {name: \'Alpha\'})-[r]-(m) RETURN n, r, m"}',
   "",
   "Question: How many nodes does each label have?",
-  "Cypher: MATCH (n) UNWIND labels(n) AS label RETURN label, count(*) AS total ORDER BY total DESC",
+  '{"cypher_query": "MATCH (n) UNWIND labels(n) AS label RETURN label, count(*) AS total ORDER BY total DESC"}',
+];
+
+const OUTPUT_INSTRUCTIONS = [
+  "The output MUST be a valid JSON with a single property cypher_query",
+  "FORMAT {cypher_query: <cypher query here>}",
 ];
 
 /** Builds the system prompt with the graph's labels and relationship types. */
@@ -28,16 +36,21 @@ export function buildSystemPrompt(schema: GraphSchema): string {
     "",
     "Examples:",
     ...EXAMPLES,
+    ...OUTPUT_INSTRUCTIONS,
   ].join("\n");
 }
 
 /** Builds the prompt that asks the model to fix a query that failed. */
-export function buildRetryPrompt(question: string, failedCypher: string, error: string): string {
+export function buildRetryPrompt(
+  question: string,
+  failedCypher: string,
+  error: string,
+): string {
   return [
     `Question: ${question}`,
     `This Cypher query failed: ${failedCypher}`,
     `Error: ${error}`,
-    "Reply with a corrected read-only Cypher query only.",
+    'Reply with a corrected read-only Cypher query as a JSON object only: {"cypher_query": "<cypher query here>"}',
   ].join("\n");
 }
 

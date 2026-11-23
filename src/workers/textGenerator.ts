@@ -17,7 +17,7 @@ export function loadTextGenerator(
   generatorPromise ??= pipeline("text-generation", MODEL_ID, {
     device: "webgpu",
     // dtype: "q4",
-    dtype: "q4f16",
+    dtype: "q8",
     progress_callback: onProgress,
   });
   return generatorPromise;

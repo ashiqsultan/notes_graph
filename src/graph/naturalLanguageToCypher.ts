@@ -1,4 +1,4 @@
-import { cypherFromReply } from "@/graph/cypherFromReply";
+import { cypherFromJsonReply } from "@/graph/cypherFromJsonReply";
 import { envelopeError } from "@/graph/envelopeRows";
 import { readOnlyViolation } from "@/graph/readOnlyGuard";
 import { readSchema } from "@/graph/readSchema";
@@ -35,7 +35,7 @@ export async function naturalLanguageToCypher(
 }
 
 async function generateCypher(prompt: string, systemPrompt: string): Promise<string> {
-  return cypherFromReply(await generateText(prompt, systemPrompt));
+  return cypherFromJsonReply(await generateText(prompt, systemPrompt));
 }
 
 async function attemptQuery(cypher: string, onStage: StageReporter): Promise<Text2CypherResult> {
