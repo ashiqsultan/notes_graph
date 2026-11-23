@@ -18,12 +18,6 @@ const PALETTE = [
 ];
 const UNLABELED_COLOR = "#9ca3af";
 
-/** Every node type with a fixed color, for the graph legend. */
-export const LEGEND_ENTRIES = Array.from(FIXED_COLORS, ([label, color]) => ({
-  label,
-  color,
-}));
-
 /** Returns the color for a node type. The same label always gets the same color. */
 export function colorForLabel(label: string | undefined): string {
   if (!label) return UNLABELED_COLOR;

@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 interface SidebarShowAllButtonProps {
   onClick: () => void;
   disabled: boolean;
+  className?: string;
 }
 
-function SidebarShowAllButton({ onClick, disabled }: SidebarShowAllButtonProps) {
+function SidebarShowAllButton({ onClick, disabled, className }: SidebarShowAllButtonProps) {
   return (
-    <Button type="button" variant="outline" className="w-full" onClick={onClick} disabled={disabled}>
+    <Button type="button" variant="default" className={className} onClick={onClick} disabled={disabled}>
       Show all
     </Button>
   );
