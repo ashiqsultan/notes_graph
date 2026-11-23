@@ -4,7 +4,7 @@ import {
   type TextGenerationPipeline,
 } from "@huggingface/transformers";
 
-const MODEL_ID = "onnx-community/Qwen3-0.6B-ONNX";
+const MODEL_ID = "onnx-community/Qwen3.5-0.8B-ONNX";
 const SYSTEM_PROMPT = "You are a helpful assistant. Answer the user's question.";
 const MAX_NEW_TOKENS = 1024;
 

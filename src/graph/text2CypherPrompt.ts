@@ -4,6 +4,7 @@ const RULES = [
   "You translate questions into one Cypher query for a graph database.",
   "Reply with the Cypher query only: no explanation, no markdown.",
   "Use only the node labels and relationship types listed below.",
+  "When trying to match strings it should NOT be case sensitive, Please match both lowercase and uppercase",
   "The query must be read-only: use MATCH, OPTIONAL MATCH, WHERE, WITH, RETURN, ORDER BY and LIMIT only.",
   "Never use CREATE, MERGE, DELETE, DETACH, SET, REMOVE, DROP, LOAD CSV or CALL.",
   "When the question asks about things or how they connect, return the matching nodes and relationships so they can be drawn.",

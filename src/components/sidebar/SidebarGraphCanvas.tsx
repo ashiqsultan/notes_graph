@@ -1,14 +1,16 @@
 import { useEffect, useRef } from "react";
 import { NVL } from "@neo4j-nvl/base";
 import { DragNodeInteraction, PanInteraction, ZoomInteraction } from "@neo4j-nvl/interaction-handlers";
+import { cn } from "cn";
 import type { GraphData } from "@/graph/relateElements";
 
 interface SidebarGraphCanvasProps {
   graph: GraphData;
+  className?: string;
 }
 
 /** Draws the graph inside the sidebar with NVL. The drawing is rebuilt whenever the graph changes. */
-function SidebarGraphCanvas({ graph }: SidebarGraphCanvasProps) {
+function SidebarGraphCanvas({ graph, className }: SidebarGraphCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -18,7 +20,7 @@ function SidebarGraphCanvas({ graph }: SidebarGraphCanvasProps) {
   }, [graph]);
 
   return (
-    <div className="relative h-[360px] w-full rounded-md border">
+    <div className={cn("relative h-[360px] w-full rounded-md border", className)}>
       <div ref={containerRef} className="h-full w-full" />
       {graph.nodes.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">

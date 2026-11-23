@@ -5,9 +5,9 @@ Reply with ONE JSON object and nothing else: no explanation, no markdown.
 
 Rules:
 - "id" is a short unique id such as e1, e2, e3.
-- "label" is a single PascalCase word such as Person, Company, Place, Project, Tool, Concept, Event.
-- "name" is the entity name exactly as written in the note.
-- "type" is an UPPER_SNAKE_CASE verb phrase such as WORKS_AT, LIVES_IN, KNOWS, USES.
+- "label" is a single PascalCase word such as Person, Company, Place, Project, Tool, Concept, Event, Product etc, you are free to Create Node Types if required
+- "name" is the entity name exactly as written in the note. Shouls only contain Entities not descriptions
+- "type" is an UPPER_SNAKE_CASE verb phrase such as RELATED_TO, WORKING, LIVES_IN, LIKES etc Please create new relationship names if required based on notes, Use RELATED_TO as fallback
 - "from" and "to" must be ids from "entities".
 - Only include facts stated in the note. Never invent entities.
 - If the note has no entities, reply {"entities":[],"relations":[]}.
