@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GraphSearchInput } from "@/components/sidebar/GraphSearchInput";
 import { SidebarShowAllButton } from "@/components/sidebar/SidebarShowAllButton";
 import { SidebarGraphCanvas } from "@/components/sidebar/SidebarGraphCanvas";
 import { AllNodesList } from "@/components/sidebar/AllNodesList";
@@ -12,8 +13,9 @@ import { graphFromEnvelope } from "@/graph/graphFromEnvelope";
 import { entityItemsFromRows } from "@/graph/nodeItems";
 import { EMPTY_GRAPH, type GraphData, type RelateNode } from "@/graph/relateElements";
 import { SHOW_ALL_QUERY, nodeConnectionsQuery, nodesOfTypeQuery } from "@/graph/sidebarQueries";
+import { useGraphSearch } from "@/hooks/useGraphSearch";
 
-/** Sidebar graph section: a "Show all" button, the node type pills, and the graph they load. */
+/** Sidebar graph section: a search box, "Expand" and "Show all" buttons, the node type pills, and the graph they load. */
 function SidebarGraph() {
   const [graph, setGraph] = useState<GraphData>(EMPTY_GRAPH);
   const [rows, setRows] = useState<unknown[]>([]);
@@ -22,6 +24,7 @@ function SidebarGraph() {
   const [typesVersion, setTypesVersion] = useState(0);
   const [queryText, setQueryText] = useState("");
   const [expanded, setExpanded] = useState(false);
+  const { searchText, setSearchText } = useGraphSearch(runQuery);
 
   async function runStatement(statement: string) {
     setQueryText(statement);
@@ -63,11 +66,12 @@ function SidebarGraph() {
 
   const controls = (
     <>
-      <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setExpanded(true)}>
+      <GraphSearchInput value={searchText} onChange={setSearchText} />
+      <Button type="button" size="sm" className="w-full" onClick={() => setExpanded(true)}>
         Expand
         <Maximize2 />
       </Button>
-      <SidebarShowAllButton onClick={showAll} disabled={running} className="w-full" />
+      <SidebarShowAllButton onClick={showAll} disabled={running} className="w-full" variant="outline" />
       <AllNodesList onSelectType={showType} typesVersion={typesVersion} />
       {error && <p className="text-sm text-destructive">{error}</p>}
     </>
@@ -87,6 +91,8 @@ function SidebarGraph() {
         error={error}
         typesVersion={typesVersion}
         queryText={queryText}
+        searchText={searchText}
+        onSearchChange={setSearchText}
         onQueryTextChange={setQueryText}
         onShowAll={showAll}
         onSelectType={showType}

@@ -1,5 +1,3 @@
-import { useEffect, useEffectEvent, useState } from "react";
-import type { KeyboardEvent } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +10,9 @@ import { GraphResultsTabs } from "@/components/sidebar/GraphResultsTabs";
 import { GraphSearchInput } from "@/components/sidebar/GraphSearchInput";
 import { NodeItemsList } from "@/components/sidebar/NodeItemsList";
 import { SidebarShowAllButton } from "@/components/sidebar/SidebarShowAllButton";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { entityItemsFromRows } from "@/graph/nodeItems";
-import { nodeConnectionsQuery, nodeSearchQuery } from "@/graph/sidebarQueries";
+import { nodeConnectionsQuery } from "@/graph/sidebarQueries";
 import type { GraphData, RelateNode } from "@/graph/relateElements";
-
-const SEARCH_DELAY_MS = 500;
 
 interface GraphViewFullProps {
   open: boolean;
@@ -28,13 +23,15 @@ interface GraphViewFullProps {
   error: string;
   typesVersion: number;
   queryText: string;
+  searchText: string;
+  onSearchChange: (value: string) => void;
   onQueryTextChange: (query: string) => void;
   onShowAll: () => void;
   onSelectType: (type: string) => void;
   onRunQuery: (query: string) => void;
 }
 
-/** Large dialog: query, show all and node type filters on the left, the full-size graph on the right. */
+/** Large dialog: search on top, then query, show all and node type filters on the left and the full-size graph on the right. */
 function GraphViewFull({
   open,
   onOpenChange,
@@ -44,32 +41,19 @@ function GraphViewFull({
   error,
   typesVersion,
   queryText,
+  searchText,
+  onSearchChange,
   onQueryTextChange,
   onShowAll,
   onSelectType,
   onRunQuery,
 }: GraphViewFullProps) {
-  const [searchText, setSearchText] = useState("");
-  const debouncedSearch = useDebouncedValue(searchText, SEARCH_DELAY_MS);
   const entities = entityItemsFromRows(rows);
-
-  const runSearch = useEffectEvent((text: string) => {
-    const query = nodeSearchQuery(text);
-    if (query) onRunQuery(query);
-  });
-
-  useEffect(() => {
-    runSearch(debouncedSearch);
-  }, [debouncedSearch]);
 
   function selectNode(node: RelateNode) {
     const query = nodeConnectionsQuery(node.id);
     onQueryTextChange(query);
     onRunQuery(query);
-  }
-
-  function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Enter") event.preventDefault();
   }
 
   return (
@@ -81,11 +65,7 @@ function GraphViewFull({
         </DialogHeader>
         <div className="flex min-h-0 flex-col gap-4">
           <div className="mx-auto w-full max-w-xl">
-            <GraphSearchInput
-              value={searchText}
-              onChange={setSearchText}
-              onKeyDown={handleSearchKeyDown}
-            />
+            <GraphSearchInput value={searchText} onChange={onSearchChange} />
           </div>
           <div className="flex min-h-0 gap-4">
             <div className="flex w-80 shrink-0 flex-col gap-4 overflow-y-auto">

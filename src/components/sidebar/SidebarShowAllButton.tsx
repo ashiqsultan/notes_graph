@@ -4,11 +4,12 @@ interface SidebarShowAllButtonProps {
   onClick: () => void;
   disabled: boolean;
   className?: string;
+  variant?: "default" | "outline";
 }
 
-function SidebarShowAllButton({ onClick, disabled, className }: SidebarShowAllButtonProps) {
+function SidebarShowAllButton({ onClick, disabled, className, variant = "default" }: SidebarShowAllButtonProps) {
   return (
-    <Button type="button" variant="default" className={className} onClick={onClick} disabled={disabled}>
+    <Button type="button" variant={variant} className={className} onClick={onClick} disabled={disabled}>
       Show all
     </Button>
   );
