@@ -30,6 +30,12 @@ interface NotesState {
   classifier: ClassifierState;
   /** Increments whenever the graph changes, so views of graph data can reload. */
   graphVersion: number;
+  /** The text typed into the search box shared by the notes grid and the sidebar graph. */
+  searchText: string;
+  /** Ids of the notes found by the last search, or null when no search has run. */
+  matchingNoteIds: Set<number> | null;
+  /** Whether the full-size graph view dialog is open. */
+  graphExpanded: boolean;
 
   /** Loads all notes from IndexedDB into state. */
   fetchNotes: () => Promise<void>;
@@ -49,6 +55,12 @@ interface NotesState {
   syncGraph: (noteId: number) => void;
   /** Starts downloading and loading the classifier model. Safe to call more than once. */
   loadClassifier: () => void;
+  /** Updates the search text. */
+  setSearchText: (text: string) => void;
+  /** Sets the note ids that match the search, or null to stop filtering. */
+  setMatchingNoteIds: (ids: Set<number> | null) => void;
+  /** Opens or closes the full-size graph view dialog. */
+  setGraphExpanded: (expanded: boolean) => void;
 }
 
 let classifierLoadStarted = false;
@@ -61,6 +73,15 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   unsyncedNoteId: null,
   classifier: INITIAL_CLASSIFIER_STATE,
   graphVersion: 0,
+  searchText: "",
+  matchingNoteIds: null,
+  graphExpanded: false,
+
+  setSearchText: (text) => set({ searchText: text }),
+
+  setMatchingNoteIds: (ids) => set({ matchingNoteIds: ids }),
+
+  setGraphExpanded: (expanded) => set({ graphExpanded: expanded }),
 
   fetchNotes: async () => {
     const notes = await getAllNotes();

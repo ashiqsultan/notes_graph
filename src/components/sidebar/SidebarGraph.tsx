@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { GraphSearchInput } from "@/components/sidebar/GraphSearchInput";
 import { SidebarShowAllButton } from "@/components/sidebar/SidebarShowAllButton";
 import { SidebarGraphCanvas } from "@/components/sidebar/SidebarGraphCanvas";
 import { AllNodesList } from "@/components/sidebar/AllNodesList";
@@ -11,11 +10,13 @@ import { envelopeError, envelopeRows } from "@/graph/envelopeRows";
 import { runCypher } from "@/graph/relateClient";
 import { graphFromEnvelope } from "@/graph/graphFromEnvelope";
 import { listableNodesFromRows } from "@/graph/nodeItems";
+import { noteIdsFromRows } from "@/graph/noteIdsFromRows";
 import { EMPTY_GRAPH, type GraphData, type RelateNode } from "@/graph/relateElements";
 import { SHOW_ALL_QUERY, nodeConnectionsQuery, nodesOfTypeQuery } from "@/graph/sidebarQueries";
 import { useGraphSearch } from "@/hooks/useGraphSearch";
+import { useNotesStore } from "@/store";
 
-/** Sidebar graph section: a search box, "Expand" and "Show all" buttons, the node type pills, and the graph they load. */
+/** Sidebar graph section: "Expand" and "Show all" buttons, the node type pills, and the graph they load. */
 function SidebarGraph() {
   const [graph, setGraph] = useState<GraphData>(EMPTY_GRAPH);
   const [rows, setRows] = useState<unknown[]>([]);
@@ -23,10 +24,14 @@ function SidebarGraph() {
   const [error, setError] = useState("");
   const [typesVersion, setTypesVersion] = useState(0);
   const [queryText, setQueryText] = useState("");
-  const [expanded, setExpanded] = useState(false);
-  const { searchText, setSearchText } = useGraphSearch(runQuery);
+  const searchText = useNotesStore((state) => state.searchText);
+  const setSearchText = useNotesStore((state) => state.setSearchText);
+  const setMatchingNoteIds = useNotesStore((state) => state.setMatchingNoteIds);
+  const expanded = useNotesStore((state) => state.graphExpanded);
+  const setExpanded = useNotesStore((state) => state.setGraphExpanded);
+  useGraphSearch(runSearch, showAllAfterBlankSearch);
 
-  async function runStatement(statement: string) {
+  async function runStatement(statement: string): Promise<unknown[]> {
     setQueryText(statement);
     setRunning(true);
     setError("");
@@ -34,20 +39,34 @@ function SidebarGraph() {
       const text = await runCypher(statement);
       const statementError = envelopeError(text);
       if (statementError) throw new Error(statementError);
+      const resultRows = envelopeRows(text);
       setGraph(graphFromEnvelope(text));
-      setRows(envelopeRows(text));
+      setRows(resultRows);
+      return resultRows;
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setGraph(EMPTY_GRAPH);
       setRows([]);
+      return [];
     } finally {
       setRunning(false);
       setTypesVersion((version) => version + 1);
     }
   }
 
+  function runSearch(query: string) {
+    void runStatement(query).then((resultRows) => {
+      setMatchingNoteIds(noteIdsFromRows(resultRows));
+    });
+  }
+
   function showAll() {
     void runStatement(SHOW_ALL_QUERY);
+  }
+
+  function showAllAfterBlankSearch() {
+    setMatchingNoteIds(null);
+    showAll();
   }
 
   function showType(type: string) {
@@ -66,13 +85,21 @@ function SidebarGraph() {
 
   const controls = (
     <>
-      <GraphSearchInput value={searchText} onChange={setSearchText} />
       <Button type="button" size="sm" className="w-full" onClick={() => setExpanded(true)}>
         Expand
         <Maximize2 />
       </Button>
-      <SidebarShowAllButton onClick={showAll} disabled={running} className="w-full" variant="outline" />
-      <AllNodesList onSelectType={showType} typesVersion={typesVersion} />
+      <AllNodesList
+        onSelectType={showType}
+        typesVersion={typesVersion}
+        leading={
+          <SidebarShowAllButton
+            onClick={showAll}
+            disabled={running}
+            className="h-auto rounded-full px-2.5 py-1 text-xs font-medium"
+          />
+        }
+      />
       {error && <p className="text-sm text-destructive">{error}</p>}
     </>
   );

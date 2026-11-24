@@ -24,7 +24,7 @@ function NoteCard({ note, nodeTypes }: { note: Note; nodeTypes: string[] }) {
     <>
       <Card
         size="sm"
-        className="mb-4 cursor-pointer break-inside-avoid transition-shadow hover:shadow-lg"
+        className="cursor-pointer transition-shadow hover:shadow-lg"
         onClick={() => openComposer(note.id)}
       >
         <CardHeader>

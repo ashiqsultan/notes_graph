@@ -107,12 +107,12 @@ function NodeTypesSettings() {
       <Button
         type="button"
         variant="outline"
-        size="sm"
-        className="w-full"
+        className="h-11 px-4 max-md:w-11 max-md:px-0"
+        aria-label="Node types"
         onClick={() => setOpen(true)}
       >
         <SlidersHorizontal />
-        Node types
+        <span className="max-md:hidden">Node types</span>
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
