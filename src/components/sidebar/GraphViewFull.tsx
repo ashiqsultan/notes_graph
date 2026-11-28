@@ -12,7 +12,7 @@ import { NodeItemsList } from "@/components/sidebar/NodeItemsList";
 import { SidebarShowAllButton } from "@/components/sidebar/SidebarShowAllButton";
 import { listableNodesFromRows } from "@/graph/nodeItems";
 import { nodeConnectionsQuery } from "@/graph/sidebarQueries";
-import type { GraphData, RelateNode } from "@/graph/relateElements";
+import type { GraphData } from "@/graph/relateElements";
 
 interface GraphViewFullProps {
   open: boolean;
@@ -50,8 +50,8 @@ function GraphViewFull({
 }: GraphViewFullProps) {
   const listableNodes = listableNodesFromRows(rows);
 
-  function selectNode(node: RelateNode) {
-    const query = nodeConnectionsQuery(node.id);
+  function selectNode(nodeId: number) {
+    const query = nodeConnectionsQuery(nodeId);
     onQueryTextChange(query);
     onRunQuery(query);
   }
@@ -82,7 +82,7 @@ function GraphViewFull({
               </div>
               <NodeItemsList nodes={listableNodes} onSelectNode={selectNode} />
             </div>
-            <GraphResultsTabs graph={graph} rows={rows} />
+            <GraphResultsTabs graph={graph} rows={rows} onSelectNode={selectNode} />
           </div>
         </div>
       </DialogContent>

@@ -5,7 +5,7 @@ import { colorForLabel } from "@/graph/nodeColors";
 
 interface NodeItemsListProps {
   nodes: RelateNode[];
-  onSelectNode: (node: RelateNode) => void;
+  onSelectNode: (nodeId: number) => void;
 }
 
 /** A scrollable list of the nodes in the current result. Clicking one shows its direct connections. */
@@ -19,7 +19,7 @@ function NodeItemsList({ nodes, onSelectNode }: NodeItemsListProps) {
           <li key={node.id}>
             <button
               type="button"
-              onClick={() => onSelectNode(node)}
+              onClick={() => onSelectNode(node.id)}
               className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
             >
               <span

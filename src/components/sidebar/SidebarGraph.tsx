@@ -11,7 +11,7 @@ import { runCypher } from "@/graph/relateClient";
 import { graphFromEnvelope } from "@/graph/graphFromEnvelope";
 import { listableNodesFromRows } from "@/graph/nodeItems";
 import { noteIdsFromRows } from "@/graph/noteIdsFromRows";
-import { EMPTY_GRAPH, type GraphData, type RelateNode } from "@/graph/relateElements";
+import { EMPTY_GRAPH, type GraphData } from "@/graph/relateElements";
 import { SHOW_ALL_QUERY, nodeConnectionsQuery, nodesOfTypeQuery } from "@/graph/sidebarQueries";
 import { useGraphSearch } from "@/hooks/useGraphSearch";
 import { useNotesStore } from "@/store";
@@ -84,8 +84,8 @@ function SidebarGraph() {
     void runStatement(query);
   }
 
-  function selectNode(node: RelateNode) {
-    runQuery(nodeConnectionsQuery(node.id));
+  function selectNode(nodeId: number) {
+    runQuery(nodeConnectionsQuery(nodeId));
   }
 
   const listableNodes = listableNodesFromRows(rows);
@@ -114,7 +114,7 @@ function SidebarGraph() {
   return (
     <div className="flex flex-col gap-2 p-2">
       {controls}
-      <SidebarGraphCanvas graph={graph} className="mt-2" />
+      <SidebarGraphCanvas graph={graph} className="mt-2" onSelectNode={selectNode} />
       <NodeItemsList nodes={listableNodes} onSelectNode={selectNode} />
       <GraphViewFull
         open={expanded}
