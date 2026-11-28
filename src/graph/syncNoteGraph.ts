@@ -63,10 +63,10 @@ async function rebuildNoteGraph(noteId: number, title: string, noteText: string)
   }
 }
 
-function toNoteText(note: Note): string {
+export function toNoteText(note: Note): string {
   return `${note.title}\n\n${note.body}`.trim();
 }
 
-function displayTitle(title: string): string {
+export function displayTitle(title: string): string {
   return title.trim() || "Untitled note";
 }
