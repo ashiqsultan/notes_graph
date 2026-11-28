@@ -33,7 +33,7 @@ function parseJson(text: string): unknown {
 }
 
 /** Finds every node and relationship inside a value, including lists and paths. */
-function collectElements(value: unknown): unknown[] {
+export function collectElements(value: unknown): unknown[] {
   if (Array.isArray(value)) return value.flatMap(collectElements);
   if (!isRecord(value)) return [];
   if (isRelateNode(value) || isRelateRelationship(value)) return [value];

@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ClearNotesSetting } from "@/components/settings/ClearNotesSetting";
+import { ExportBackupSetting } from "@/components/settings/ExportBackupSetting";
 
 /** Header button that opens the settings dialog. */
 function SettingsDialog() {
@@ -32,6 +33,7 @@ function SettingsDialog() {
             <DialogTitle>Settings</DialogTitle>
             <DialogDescription>Manage your notes and graph.</DialogDescription>
           </DialogHeader>
+          <ExportBackupSetting />
           <ClearNotesSetting onCleared={() => setOpen(false)} />
         </DialogContent>
       </Dialog>
