@@ -14,16 +14,20 @@ interface NotesBackup {
 
 /** Replaces every note and the graph with the contents of a backup file. */
 export async function restoreBackup(file: File): Promise<void> {
-  const backup = parseBackup(await file.text());
+  await restoreBackupData(JSON.parse(await file.text()));
+}
+
+/** Replaces every note and the graph with already parsed backup data. */
+export async function restoreBackupData(data: unknown): Promise<void> {
+  const backup = parseBackup(data);
   await waitForGraphSyncs();
   await clearAll();
   await db.notes.bulkAdd(backup.notes);
   await restoreGraph(backup.graph);
 }
 
-/** Checks the whole file before anything is cleared. Throws when the file is not a backup. */
-function parseBackup(text: string): NotesBackup {
-  const data: unknown = JSON.parse(text);
+/** Checks the whole data before anything is cleared. Throws when it is not a backup. */
+function parseBackup(data: unknown): NotesBackup {
   if (!isRecord(data)) throw new Error("the file is not a backup object");
   const notes = validateNotes(data.notes);
   const graph = keepGraphOfNotes(validateGraph(data.graph), notes);
