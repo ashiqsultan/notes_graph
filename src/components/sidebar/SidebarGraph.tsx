@@ -16,6 +16,9 @@ import { SHOW_ALL_QUERY, nodeConnectionsQuery, nodesOfTypeQuery } from "@/graph/
 import { useGraphSearch } from "@/hooks/useGraphSearch";
 import { useNotesStore } from "@/store";
 
+/** Runs the initial show-all once per page load, not on sidebar remounts after a reset. */
+let initialGraphLoadStarted = false;
+
 /** Sidebar graph section: "Expand" and "Show all" buttons, the node type pills, and the graph they load. */
 function SidebarGraph() {
   const [graph, setGraph] = useState<GraphData>(EMPTY_GRAPH);
@@ -66,8 +69,9 @@ function SidebarGraph() {
   }
 
   function showAllAfterBlankSearch() {
-    // Skips the blank run on mount, so a reset sidebar stays empty.
-    if (matchingNoteIds === null) return;
+    // Skips the blank run when the sidebar remounts after a reset; page load still shows all.
+    if (matchingNoteIds === null && initialGraphLoadStarted) return;
+    initialGraphLoadStarted = true;
     setMatchingNoteIds(null);
     showAll();
   }
