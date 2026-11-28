@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/components/ui/toast";
 import { clearAll } from "@/lib/clearAll";
-import { useNotesStore } from "@/store";
+import { useRefreshNotesAndGraph } from "@/hooks/useRefreshNotesAndGraph";
 
 interface ClearNotesSettingProps {
   /** Called after the notes and graph were cleared successfully. */
@@ -24,7 +24,7 @@ interface ClearNotesSettingProps {
 function ClearNotesSetting({ onCleared }: ClearNotesSettingProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [clearing, setClearing] = useState(false);
-  const refreshAfterClear = useRefreshAfterClear();
+  const refreshAfterClear = useRefreshNotesAndGraph();
 
   async function confirmClear() {
     setClearing(true);
@@ -81,19 +81,6 @@ async function attemptClear(): Promise<boolean> {
     });
     return false;
   }
-}
-
-/** Returns a function that reloads the notes and resets the sidebar so every view shows the empty state. */
-function useRefreshAfterClear(): () => void {
-  const fetchNotes = useNotesStore((state) => state.fetchNotes);
-  const notifyGraphChanged = useNotesStore((state) => state.notifyGraphChanged);
-  const resetSidebar = useNotesStore((state) => state.resetSidebar);
-
-  return () => {
-    void fetchNotes();
-    notifyGraphChanged();
-    resetSidebar();
-  };
 }
 
 export { ClearNotesSetting };

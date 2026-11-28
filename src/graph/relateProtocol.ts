@@ -4,6 +4,7 @@ export interface RunRequest {
   id: number;
   kind: "run";
   statement: string;
+  params?: Record<string, unknown>;
 }
 
 export interface ResetRequest {

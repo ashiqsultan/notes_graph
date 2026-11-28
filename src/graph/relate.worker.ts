@@ -8,7 +8,7 @@ interface RelateEngine {
 }
 
 interface EngineDatabase {
-  execute: (statement: string) => string;
+  execute: (statement: string, paramsJson?: string | null) => string;
   reset: () => void;
 }
 
@@ -56,7 +56,8 @@ function performRequest(db: EngineDatabase, request: WorkerRequest): string {
     db.reset();
     return "";
   }
-  return db.execute(request.statement);
+  const paramsJson = request.kind === "run" && request.params ? JSON.stringify(request.params) : null;
+  return db.execute(request.statement, paramsJson);
 }
 
 async function handleRequest(request: WorkerRequest): Promise<RunResponse> {

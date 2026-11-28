@@ -59,8 +59,8 @@ function send(buildRequest: (id: number) => WorkerRequest): Promise<string> {
   });
 }
 
-export function runCypher(statement: string): Promise<string> {
-  return send((id) => ({ id, kind: "run", statement }));
+export function runCypher(statement: string, params?: Record<string, unknown>): Promise<string> {
+  return send((id) => ({ id, kind: "run", statement, params }));
 }
 
 export async function resetGraph(): Promise<void> {
