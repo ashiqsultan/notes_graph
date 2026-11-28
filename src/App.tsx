@@ -11,6 +11,7 @@ function App() {
   const fetchNotes = useNotesStore((state) => state.fetchNotes);
   const loadClassifier = useNotesStore((state) => state.loadClassifier);
   const classifier = useNotesStore((state) => state.classifier);
+  const sidebarSession = useNotesStore((state) => state.sidebarSession);
 
   useEffect(() => {
     void fetchNotes();
@@ -32,7 +33,7 @@ function App() {
           <NotesGrid />
         </main>
         <aside className="hidden w-[35%] shrink-0 flex-col overflow-y-auto border-l md:flex">
-          <SidebarGraph />
+          <SidebarGraph key={sidebarSession} />
         </aside>
       </div>
       <NoteComposer />

@@ -36,6 +36,8 @@ interface NotesState {
   matchingNoteIds: Set<number> | null;
   /** Whether the full-size graph view dialog is open. */
   graphExpanded: boolean;
+  /** Increments to remount the sidebar graph with its initial, empty state. */
+  sidebarSession: number;
 
   /** Loads all notes from IndexedDB into state. */
   fetchNotes: () => Promise<void>;
@@ -61,6 +63,8 @@ interface NotesState {
   setMatchingNoteIds: (ids: Set<number> | null) => void;
   /** Opens or closes the full-size graph view dialog. */
   setGraphExpanded: (expanded: boolean) => void;
+  /** Clears the search and returns the sidebar graph to its initial state. */
+  resetSidebar: () => void;
 }
 
 let classifierLoadStarted = false;
@@ -76,6 +80,14 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   searchText: "",
   matchingNoteIds: null,
   graphExpanded: false,
+  sidebarSession: 0,
+
+  resetSidebar: () =>
+    set((state) => ({
+      searchText: "",
+      matchingNoteIds: null,
+      sidebarSession: state.sidebarSession + 1,
+    })),
 
   setSearchText: (text) => set({ searchText: text }),
 
@@ -112,6 +124,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     await deleteNote(id);
     await get().fetchNotes();
     get().syncGraph(id);
+    get().resetSidebar();
   },
 
   openComposer: (noteId) =>

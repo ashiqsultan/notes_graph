@@ -31,6 +31,11 @@ export function queueNoteGraphSync(noteId: number): Promise<void> {
   return syncChain;
 }
 
+/** Resolves once every graph update queued so far has finished. */
+export function waitForGraphSyncs(): Promise<void> {
+  return syncChain;
+}
+
 async function syncNoteGraph(noteId: number): Promise<void> {
   const note = await getNote(noteId);
   const noteText = note ? toNoteText(note) : "";

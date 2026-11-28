@@ -29,3 +29,8 @@ export async function updateNote(id: number, input: NoteInput): Promise<void> {
 export async function deleteNote(id: number): Promise<void> {
   await db.notes.delete(id);
 }
+
+/** Permanently deletes every note. Node types are kept. */
+export async function clearNotes(): Promise<void> {
+  await db.notes.clear();
+}

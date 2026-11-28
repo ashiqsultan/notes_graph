@@ -26,6 +26,7 @@ function SidebarGraph() {
   const [queryText, setQueryText] = useState("");
   const searchText = useNotesStore((state) => state.searchText);
   const setSearchText = useNotesStore((state) => state.setSearchText);
+  const matchingNoteIds = useNotesStore((state) => state.matchingNoteIds);
   const setMatchingNoteIds = useNotesStore((state) => state.setMatchingNoteIds);
   const expanded = useNotesStore((state) => state.graphExpanded);
   const setExpanded = useNotesStore((state) => state.setGraphExpanded);
@@ -65,6 +66,8 @@ function SidebarGraph() {
   }
 
   function showAllAfterBlankSearch() {
+    // Skips the blank run on mount, so a reset sidebar stays empty.
+    if (matchingNoteIds === null) return;
     setMatchingNoteIds(null);
     showAll();
   }

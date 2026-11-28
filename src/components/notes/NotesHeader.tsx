@@ -2,6 +2,7 @@ import { Network, PlusIcon, StickyNoteIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NodeTypesSettings } from "@/components/settings/NodeTypesSettings";
 import { NotesSearchBar } from "@/components/notes/NotesSearchBar";
+import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import { useNotesStore } from "@/store";
 
 /** Full-width top app bar: brand, search, and the New note, graph and node type actions, aligned to the start. */
@@ -46,6 +47,7 @@ function NotesHeader() {
         <div className="shrink-0">
           <NodeTypesSettings />
         </div>
+        <SettingsDialog />
       </div>
     </header>
   );
